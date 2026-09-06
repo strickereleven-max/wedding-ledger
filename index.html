@@ -1,0 +1,1279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F6F3F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161020" media="(prefers-color-scheme: dark)">
+<meta name="description" content="A private tracker for wedding costs, payments, and the balance still due to each vendor.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Wedding Ledger">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>html{background:#F6F3F7;-webkit-text-size-adjust:100%}@media (prefers-color-scheme:dark){html:not([data-theme="light"]){background:#161020}}html[data-theme="dark"]{background:#161020}</style>
+<script>
+  /* ============================================================
+     CROSS-DEVICE SYNC (optional). Leave the values blank to keep
+     this page device-only. To turn on "Sign in with Google" sync,
+     paste your Firebase web-app config values between the quotes.
+     Setup guide: see SYNC-SETUP.md
+     ============================================================ */
+  window.FIREBASE_CONFIG = {
+    apiKey: "AIzaSyDowGxEy8153VtqNNtsGjPInJ6Jgcf3Gmg",
+    authDomain: "wedding-ledger-c1a11.firebaseapp.com",
+    projectId: "wedding-ledger-c1a11",
+    appId: "1:999543196533:web:2a6b4d844bbbe339ac213c"
+  };
+</script>
+<title>Wedding Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+
+  :root{
+    --ground:#F6F3F7; --surface:#FFFFFF; --surface-2:#FBF8FC;
+    --ink:#221A2A; --muted:#6B6175; --line:#E9E3EE;
+    --accent:#1F7A5A; --accent-ink:#0F5038; --accent-soft:#E3F0EA;
+    --due:#B5512F; --due-soft:#F7E7DF; --gold:#A9843F;
+    --on-accent:#FFFFFF; --focus:#1F7A5A;
+    --shadow:0 1px 2px rgba(34,26,42,.05), 0 12px 30px -16px rgba(34,26,42,.18);
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#161020; --surface:#211A2C; --surface-2:#1B1425;
+      --ink:#F1EAF4; --muted:#A79DB2; --line:#352B41;
+      --accent:#57C79B; --accent-ink:#AEE9D2; --accent-soft:#183A2E;
+      --due:#E88A62; --due-soft:#3A2416; --gold:#CFAA6A;
+      --on-accent:#0E2A20; --focus:#57C79B;
+      --shadow:0 1px 2px rgba(0,0,0,.35), 0 16px 36px -18px rgba(0,0,0,.7);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#161020; --surface:#211A2C; --surface-2:#1B1425;
+    --ink:#F1EAF4; --muted:#A79DB2; --line:#352B41;
+    --accent:#57C79B; --accent-ink:#AEE9D2; --accent-soft:#183A2E;
+    --due:#E88A62; --due-soft:#3A2416; --gold:#CFAA6A;
+    --on-accent:#0E2A20; --focus:#57C79B;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 16px 36px -18px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font:400 15px/1.55 "Instrument Sans",system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased}
+
+  input,select,button{font:inherit;color:inherit}
+  input[type=number]{-moz-appearance:textfield;appearance:textfield}
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+  /* ---- top bar ---- */
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+    gap:14px;padding:12px clamp(16px,4vw,40px);
+    background:var(--ground);
+    background:color-mix(in srgb,var(--ground) 86%,transparent);
+    backdrop-filter:saturate(1.4) blur(10px);
+    border-bottom:1px solid var(--line)}
+  .brand{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.1rem;letter-spacing:-.01em;
+    display:flex;align-items:center;gap:9px}
+  .brand .mark{color:var(--gold);font-size:1.15rem;transform:translateY(-1px)}
+  .tools{display:flex;align-items:center;gap:18px}
+  .tchip{font-size:.82rem;color:var(--muted);white-space:nowrap}
+  .tchip b{font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--due);font-weight:600;margin-left:5px;
+    font-variant-numeric:tabular-nums}
+  .cur{display:flex;align-items:center;gap:7px;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .cur select{font-size:.82rem;letter-spacing:0;text-transform:none;color:var(--ink);
+    background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+
+  main{max-width:1080px;margin:0 auto;padding:clamp(20px,4vw,38px);
+    display:flex;flex-direction:column;gap:30px}
+
+  .sec-h{font-family:"Fraunces",Georgia,serif;font-weight:500;font-size:1.18rem;letter-spacing:-.01em;
+    margin:0 0 14px;text-wrap:balance}
+
+  /* ---- summary ---- */
+  .wed-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  .wed{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .wed .k{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .wed input[type=date]{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:7px 10px}
+  .wed .dtg{font-family:"Fraunces",Georgia,serif;font-style:italic;font-weight:500;color:var(--gold);font-size:1.02rem}
+
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .tile{background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:16px 16px 18px;
+    box-shadow:var(--shadow);display:flex;flex-direction:column;gap:7px;min-width:0}
+  .tile .k{font-size:.66rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+  .tile .v{font-family:"Fraunces",Georgia,serif;font-optical-sizing:auto;font-weight:500;
+    font-size:clamp(1.6rem,4.4vw,2.35rem);line-height:1.03;letter-spacing:-.015em;
+    font-variant-numeric:tabular-nums}
+  .tile .s{font-size:.8rem;color:var(--muted)}
+  .tile .s .ok{color:var(--accent-ink)} .tile .s .over{color:var(--due);font-weight:600}
+  .tile.paid .v{color:var(--accent-ink)}
+  .tile.due{border-color:color-mix(in srgb,var(--due) 40%,var(--line));
+    background:linear-gradient(176deg,var(--due-soft),var(--surface) 62%)}
+  .tile.due .v{color:var(--due)}
+  input.v{border:1px solid transparent;background:transparent;width:100%;padding:2px 5px;margin:-2px -5px;border-radius:8px}
+  input.v::placeholder{color:var(--muted);opacity:.6}
+  input.v:hover{border-color:var(--line)}
+  input.v:focus{outline:none;border-color:var(--focus);background:var(--ground)}
+
+  .meter-wrap{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+  .meter-label{display:flex;justify-content:space-between;font-size:.72rem;font-weight:600;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .meter{height:10px;border-radius:999px;background:var(--accent-soft);overflow:hidden}
+  .meter-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--gold));
+    transition:width .55s cubic-bezier(.4,0,.2,1)}
+  .meter-sub{font-size:.82rem;color:var(--muted);font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-variant-numeric:tabular-nums}
+
+  /* ---- add form ---- */
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    padding:clamp(16px,3vw,24px);box-shadow:var(--shadow)}
+  .add-form{display:grid;grid-template-columns:2.2fr 1.5fr 1fr 1fr 1.2fr auto;gap:11px;align-items:end}
+  .field{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .field label{font-size:.66rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .field input,.field select{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 11px}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--focus);
+    box-shadow:0 0 0 3px var(--accent-soft);background:var(--surface)}
+  .btn{background:var(--accent);color:var(--on-accent);border:0;border-radius:11px;padding:11px 20px;
+    font-weight:600;cursor:pointer;height:42px}
+  .btn:hover{filter:brightness(1.06)}
+
+  /* ---- controls ---- */
+  .controls{display:flex;flex-direction:column;gap:9px;margin-bottom:16px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{border:1px solid var(--line);background:var(--surface);color:var(--muted);
+    padding:6px 13px;border-radius:999px;font-size:.82rem;font-weight:500;cursor:pointer}
+  .chip:hover{color:var(--ink);border-color:var(--muted)}
+  .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+
+  /* ---- ledger ---- */
+  .sample-note{font-size:.82rem;color:var(--muted);background:var(--accent-soft);
+    border:1px solid color-mix(in srgb,var(--accent) 25%,var(--line));border-radius:11px;
+    padding:10px 13px;margin:0 0 14px}
+  .empty{color:var(--muted);text-align:center;padding:30px}
+
+  .group{background:var(--surface);border:1px solid var(--line);border-radius:15px;
+    box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
+  .group-h{display:flex;align-items:center;gap:12px;padding:12px 15px;
+    background:var(--surface-2);border-bottom:1px solid var(--line)}
+  .group-h h3{margin:0;flex:1;font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.12rem}
+  .group-h .gc{font-size:.8rem;color:var(--muted);white-space:nowrap}
+  .group-h .gd{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.92rem;font-weight:600;
+    color:var(--due);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  .row{display:grid;grid-template-columns:minmax(150px,2.2fr) 1fr 1fr .95fr 1.15fr 70px;
+    gap:10px;align-items:center;padding:11px 16px;border-top:1px solid var(--line)}
+  .row:not(.head):hover{background:var(--surface-2)}
+  .row.head{border-top:0;padding:14px 16px 9px}
+  .row.head span{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--ink);opacity:.66;text-align:right}
+  .row.head span:first-child{text-align:left}
+  .cell{min-width:0}
+  .cell::before{display:none}
+  .cell.vend{display:flex;flex-direction:column;gap:2px}
+  .cell.act{display:flex;gap:6px;justify-content:flex-end}
+  .vend-in{font-weight:600;font-size:.98rem;color:var(--ink);width:100%;border:1px solid transparent;
+    background:transparent;border-radius:8px;padding:8px}
+  .vend-in:hover{border-color:var(--line)}
+  .vend-in:focus{outline:none;border-color:var(--focus);background:var(--ground)}
+  .vend-ro{font-weight:600;font-size:.98rem;padding:8px;display:inline-block}
+  .num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:1rem;font-weight:500;color:var(--ink);
+    text-align:right;width:100%;border:1px solid transparent;background:transparent;border-radius:8px;
+    padding:8px;font-variant-numeric:tabular-nums}
+  .num:hover{border-color:var(--line)}
+  .num:focus{outline:none;border-color:var(--focus);background:var(--ground)}
+  .ro{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.98rem;color:var(--ink);padding:8px;
+    display:inline-block;font-variant-numeric:tabular-nums}
+  .dt{font-size:.92rem;color:var(--ink);width:100%;border:1px solid transparent;background:transparent;
+    border-radius:8px;padding:7px 6px}
+  .dt:hover{border-color:var(--line)}
+  .dt:focus{outline:none;border-color:var(--focus);background:var(--ground)}
+  .due-val{font-family:"IBM Plex Mono",ui-monospace,monospace;text-align:right;font-size:1rem;font-weight:600;
+    padding-right:8px;font-variant-numeric:tabular-nums}
+  .due-val.pos{color:var(--due)} .due-val.zero{color:var(--muted)}
+  .overdue{font-size:.63rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--due);padding-left:8px}
+  .row.settled .vend-in{color:var(--muted)}
+  .row.settled .cell.vend::after{content:"Paid in full";align-self:flex-start;margin-left:8px;
+    font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);
+    background:var(--accent-soft);padding:2px 8px;border-radius:999px}
+  .icon-btn{border:1px solid var(--line);background:var(--surface);color:var(--muted);
+    width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:.78rem;line-height:1;
+    display:inline-grid;place-items:center}
+  .icon-btn:hover{color:var(--ink);border-color:var(--muted)}
+  .icon-btn.del:hover{color:var(--due);border-color:var(--due)}
+  .icon-btn.armed{width:auto;padding:0 10px;background:var(--due);border-color:var(--due);
+    color:var(--on-accent);font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+
+  .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,12px);opacity:0;
+    background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:10px;font-size:.85rem;
+    box-shadow:var(--shadow);transition:opacity .25s,transform .25s;z-index:50;pointer-events:none;max-width:90vw}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
+  /* ---- passcode gate ---- */
+  .is-hidden{display:none!important}
+  .lockbtn{background:var(--surface);border:1px solid var(--line);border-radius:8px;
+    padding:6px 11px;font-size:.78rem;color:var(--muted);cursor:pointer;white-space:nowrap}
+  .lockbtn:hover{color:var(--ink);border-color:var(--muted)}
+  .acctchip{display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--muted);
+    max-width:230px;min-width:0}
+  .acctchip .acct-email{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #lockCloud{display:flex;flex-direction:column;gap:12px}
+  #lockCloud .gbtn{width:100%;height:44px;display:inline-flex;align-items:center;justify-content:center;gap:9px}
+  .lock{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;background:var(--ground)}
+  .lock-card{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--line);
+    border-radius:18px;box-shadow:var(--shadow);padding:34px 28px;text-align:center}
+  .lock-mark{color:var(--gold);font-size:1.9rem;line-height:1}
+  .lock-title{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.5rem;
+    letter-spacing:-.01em;margin:.45rem 0 .25rem}
+  .lock-sub{color:var(--muted);font-size:.88rem;line-height:1.5;margin:0 0 20px;text-wrap:balance}
+  #lockForm{display:flex;flex-direction:column;gap:12px}
+  #lockForm input[type=password]{background:var(--surface-2);border:1px solid var(--line);
+    border-radius:11px;padding:12px 13px;font-size:1rem;text-align:center;letter-spacing:.14em}
+  #lockForm input[type=password]::placeholder{letter-spacing:0}
+  #lockForm input[type=password]:focus{outline:none;border-color:var(--focus);
+    box-shadow:0 0 0 3px var(--accent-soft);background:var(--surface)}
+  .lock-remember{display:flex;align-items:center;justify-content:center;gap:8px;
+    font-size:.82rem;color:var(--muted)}
+  .lock-remember input{width:16px;height:16px;accent-color:var(--accent)}
+  #lockForm .btn{width:100%;height:44px}
+  .lock-err{color:var(--due);font-size:.82rem;font-weight:600;margin:2px 0 0}
+  .lock-reset{margin-top:16px;background:none;border:0;color:var(--muted);font-size:.78rem;
+    text-decoration:underline;cursor:pointer}
+  .lock-reset.armed{color:var(--due);text-decoration:none;font-weight:600}
+  .lock-shake{animation:lockshake .4s}
+  @keyframes lockshake{10%,90%{transform:translateX(-2px)}30%,70%{transform:translateX(4px)}50%{transform:translateX(-6px)}}
+  @media (prefers-reduced-motion:reduce){.lock-shake{animation:none}}
+
+  .foot{max-width:1080px;margin:0 auto 44px;padding:0 clamp(20px,4vw,38px);font-size:.78rem;color:var(--muted);
+    display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+  .foot-actions{display:flex;gap:14px}
+  .linkbtn{background:none;border:0;padding:0;color:var(--muted);font-size:.78rem;
+    text-decoration:underline;cursor:pointer}
+  .linkbtn:hover{color:var(--ink)}
+
+  /* ---- backup modal ---- */
+  .modal{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.45)}
+  .modal-card{width:100%;max-width:460px;background:var(--surface);border:1px solid var(--line);
+    border-radius:16px;box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;gap:12px}
+  .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .modal-head h2{margin:0;font-family:"Fraunces",Georgia,serif;font-weight:500;font-size:1.15rem}
+  .modal-sub{margin:0;font-size:.83rem;color:var(--muted);line-height:1.5}
+  .modal-text{width:100%;min-height:140px;resize:vertical;font-size:.8rem;line-height:1.5;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--surface-2);color:var(--ink);
+    border:1px solid var(--line);border-radius:10px;padding:10px}
+  .modal-text:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px var(--accent-soft)}
+  .modal-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .modal-btn{height:38px;padding:0 16px}
+  .modal-btn.danger,.modal-btn.armed{background:var(--due)}
+  .modal-file{font-size:.8rem;color:var(--muted);max-width:100%}
+
+  @media (max-width:820px){ .tiles{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:560px){
+    .topbar{flex-wrap:wrap}
+    .tools{width:100%;justify-content:space-between;gap:10px}
+    .tiles{grid-template-columns:1fr}
+  }
+  @media (max-width:720px){
+    .row{grid-template-columns:1fr 1fr;gap:11px 12px;padding:13px 14px}
+    .row.head{display:none}
+    .cell.vend{grid-column:1 / -1}
+    .cell.act{grid-column:1 / -1;justify-content:flex-start}
+    .cell::before{content:attr(data-label);display:block;font-size:.64rem;font-weight:700;
+      letter-spacing:.07em;text-transform:uppercase;color:var(--ink);opacity:.66;margin-bottom:4px}
+    .cell.vend::before,.cell.act::before{display:none}
+    .num,.dt{text-align:left;border-color:var(--line)}
+    .due-val{text-align:left;padding-right:0}
+    .add-form{grid-template-columns:1fr 1fr}
+    .add-form .field:first-child,.add-form .btn{grid-column:1 / -1}
+  }
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+
+<div id="lock" class="lock">
+  <div class="lock-card">
+    <div class="lock-mark">&#10022;</div>
+    <h1 class="lock-title">Wedding Ledger</h1>
+    <p class="lock-sub" id="lockSub">Enter your passcode to continue.</p>
+    <div id="lockCloud" class="is-hidden"></div>
+    <form id="lockForm" autocomplete="off">
+      <input type="password" id="lockPass" placeholder="Passcode" autocomplete="current-password" aria-label="Passcode">
+      <input type="password" id="lockPass2" placeholder="Confirm passcode" autocomplete="new-password" aria-label="Confirm passcode" class="is-hidden">
+      <label class="lock-remember"><input type="checkbox" id="lockTrust" checked> Trust this device</label>
+      <button type="submit" class="btn" id="lockGo">Unlock</button>
+      <p class="lock-err is-hidden" id="lockErr" role="alert"></p>
+    </form>
+    <button type="button" id="lockReset" class="lock-reset is-hidden">Reset passcode</button>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="brand"><span class="mark">&#10022;</span> Wedding Ledger</div>
+  <div class="tools">
+    <span class="tchip">Outstanding <b id="tickerDue">&mdash;</b></span>
+    <label class="cur"><span>Currency</span>
+      <select id="currency" aria-label="Currency">
+        <option value="$">$ USD</option>
+        <option value="&#8377;">&#8377; INR</option>
+        <option value="&#8364;">&#8364; EUR</option>
+        <option value="&#163;">&#163; GBP</option>
+        <option value="A$">A$ AUD</option>
+        <option value="C$">C$ CAD</option>
+      </select>
+    </label>
+    <button type="button" id="lockBtn" class="lockbtn" title="Lock this page">Lock</button>
+    <span id="acctChip" class="acctchip is-hidden">
+      <span class="acct-email"></span>
+      <button type="button" class="linkbtn" id="signOutBtn">Sign out</button>
+    </span>
+  </div>
+</header>
+
+<main>
+  <section id="summary" aria-label="Budget summary"></section>
+
+  <section class="panel">
+    <h2 class="sec-h">Add an expense</h2>
+    <form id="addForm" class="add-form">
+      <div class="field">
+        <label for="f-vendor">Vendor / item</label>
+        <input id="f-vendor" name="vendor" placeholder="e.g. Rosewood Barn" autocomplete="off" required>
+      </div>
+      <div class="field">
+        <label for="f-cat">Category</label>
+        <select id="f-cat" name="category"></select>
+      </div>
+      <div class="field">
+        <label for="f-total">Total cost</label>
+        <input id="f-total" name="total" type="number" min="0" step="1" placeholder="0">
+      </div>
+      <div class="field">
+        <label for="f-paid">Paid now</label>
+        <input id="f-paid" name="paid" type="number" min="0" step="1" placeholder="0">
+      </div>
+      <div class="field">
+        <label for="f-date">Balance due</label>
+        <input id="f-date" name="dueDate" type="date">
+      </div>
+      <button class="btn" type="submit">Add</button>
+    </form>
+  </section>
+
+  <section aria-label="Expense ledger">
+    <h2 class="sec-h">The ledger</h2>
+    <div id="controls" class="controls"></div>
+    <div id="ledger"></div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span>Every change saves automatically. <span id="saveNote"></span></span>
+  <span class="foot-actions">
+    <button type="button" class="linkbtn" id="exportBtn">Export backup</button>
+    <button type="button" class="linkbtn" id="importBtn">Import backup</button>
+  </span>
+</footer>
+
+<div id="modal" class="modal is-hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 id="modalTitle">Backup</h2>
+      <button type="button" class="icon-btn" id="modalClose" aria-label="Close">&#10005;</button>
+    </div>
+    <p class="modal-sub" id="modalSub"></p>
+    <textarea id="modalText" class="modal-text" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var CATEGORIES = ["Venue","Catering","Photography & Video","Attire & Beauty","Florals & Decor",
+    "Music & Entertainment","Cake & Desserts","Stationery","Rings","Transport","Rentals",
+    "Guest Favors","Officiant","Other"];
+
+  var SAMPLES = [
+    {vendor:"Rosewood Barn",           category:"Venue",                total:9000, paid:3000, dueDate:"2026-05-15"},
+    {vendor:"Fig & Thyme Catering",    category:"Catering",             total:6800, paid:1500, dueDate:"2026-06-01"},
+    {vendor:"A. Rivera Photography",   category:"Photography & Video",  total:3800, paid:1200, dueDate:"2026-06-10"},
+    {vendor:"Wildflower Studio",       category:"Florals & Decor",      total:2400, paid:600,  dueDate:""},
+    {vendor:"The Night Owls",          category:"Music & Entertainment",total:2200, paid:0,    dueDate:"2026-06-12"},
+    {vendor:"Sugarcraft Bakehouse",    category:"Cake & Desserts",      total:650,  paid:650,  dueDate:""}
+  ];
+
+  var state = {
+    expenses: [],
+    settings: { currency:"$", budgetTarget:0, weddingDate:"" },
+    filter: { category:"all", status:"all" }
+  };
+  var db = null, mode = "local";
+
+  var summaryEl = document.getElementById("summary");
+  var controlsEl = document.getElementById("controls");
+  var ledgerEl = document.getElementById("ledger");
+  var currencySel = document.getElementById("currency");
+  var tickerDue = document.getElementById("tickerDue");
+  var saveNote = document.getElementById("saveNote");
+  var form = document.getElementById("addForm");
+
+  /* ---------- helpers ---------- */
+  function esc(s){
+    return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function money(n){
+    n = +n || 0;
+    var c = state.settings.currency || "$";
+    var neg = n < 0; n = Math.abs(n);
+    var dec = n % 1 ? 2 : 0;
+    return (neg ? "−" : "") + c + n.toLocaleString("en-US",{minimumFractionDigits:dec,maximumFractionDigits:2});
+  }
+  function startOfToday(){ var d = new Date(); d.setHours(0,0,0,0); return d; }
+  function fmtDate(s){
+    if(!s) return "";
+    var d = new Date(s + "T00:00");
+    if(isNaN(d)) return "";
+    return d.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+  }
+  function daysToGo(s){
+    var d = new Date(s + "T00:00");
+    return Math.ceil((d - startOfToday()) / 86400000);
+  }
+  function due(e){ return Math.max((+e.total||0) - (+e.paid||0), 0); }
+  function toast(msg){
+    var t = document.createElement("div");
+    t.className = "toast"; t.setAttribute("role","status"); t.textContent = msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(function(){ t.classList.add("show"); });
+    setTimeout(function(){ t.classList.remove("show"); setTimeout(function(){ t.remove(); }, 320); }, 2600);
+  }
+  function effectiveRows(){
+    if(state.expenses.length) return state.expenses;
+    return SAMPLES.map(function(s){ var o = {}; for(var k in s) o[k]=s[k]; o._sample = true; return o; });
+  }
+
+  /* ---------- persistence ---------- */
+  function loadLocal(){
+    try{ var e = JSON.parse(localStorage.getItem("wedledger.expenses")||"[]"); if(Array.isArray(e)) state.expenses = e; }catch(x){}
+    try{ var s = JSON.parse(localStorage.getItem("wedledger.settings")||"{}"); for(var k in s) state.settings[k] = s[k]; }catch(x){}
+  }
+  function saveLocal(){
+    try{
+      localStorage.setItem("wedledger.expenses", JSON.stringify(state.expenses));
+      localStorage.setItem("wedledger.settings", JSON.stringify(state.settings));
+    }catch(x){}
+  }
+  function persistLocal(){ saveLocal(); if(typeof cloudPush === "function") cloudPush(); }
+  function addExpenseObj(o){
+    if(mode === "db"){
+      db.collection("expenses").add(o).catch(function(){ toast("Could not save that expense — try again."); });
+    }else{
+      o.id = "e" + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+      state.expenses.push(o); persistLocal(); render();
+    }
+  }
+  function patchExpense(id, patch){
+    if(mode === "db"){
+      db.doc("expenses/" + id).update(patch).catch(function(){ toast("Could not save that change."); });
+    }else{
+      var x = state.expenses.find(function(e){ return e.id === id; });
+      if(x){ for(var k in patch) x[k] = patch[k]; persistLocal(); render(); }
+    }
+  }
+  function removeExpense(id){
+    if(mode === "db"){
+      db.doc("expenses/" + id).delete().catch(function(){ toast("Could not delete that expense."); });
+    }else{
+      state.expenses = state.expenses.filter(function(e){ return e.id !== id; });
+      persistLocal(); render();
+    }
+  }
+  function saveSettings(patch){
+    for(var k in patch) state.settings[k] = patch[k];
+    render();
+    if(mode === "db"){ db.doc("app/settings").set(state.settings).catch(function(){}); }
+    else persistLocal();
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    currencySel.value = state.settings.currency || "$";
+    renderSummary();
+    renderControls();
+    renderLedger();
+    saveNote.textContent = (mode === "db" || cloud) ? "Synced across your devices." : "Saved on this device.";
+  }
+
+  function renderSummary(){
+    var rows = effectiveRows();
+    var committed = 0, paid = 0, bal = 0;
+    rows.forEach(function(e){ committed += (+e.total||0); paid += (+e.paid||0); bal += due(e); });
+    var budget = +state.settings.budgetTarget || 0;
+    var pct = committed > 0 ? Math.round(paid / committed * 100) : 0;
+
+    var wd = state.settings.weddingDate || "";
+    var dtg = "";
+    if(wd){
+      var n = daysToGo(wd);
+      dtg = n > 0 ? (n + " day" + (n===1?"":"s") + " to go")
+          : n === 0 ? "The big day is here 🎉"
+          : (Math.abs(n) + " day" + (Math.abs(n)===1?"":"s") + " ago");
+    }
+
+    var budgetSub;
+    if(budget > 0){
+      var diff = budget - committed;
+      budgetSub = '<span class="' + (diff >= 0 ? "ok" : "over") + '">' +
+        money(Math.abs(diff)) + " " + (diff >= 0 ? "under" : "over") +
+        " · " + Math.round(committed / budget * 100) + "% committed</span>";
+    }else{
+      budgetSub = "Set your target budget";
+    }
+
+    summaryEl.innerHTML =
+      '<div class="wed-row">' +
+        '<div class="wed">' +
+          '<span class="k">Wedding day</span>' +
+          '<input type="date" id="weddingDate" value="' + esc(wd) + '" aria-label="Wedding date">' +
+          (dtg ? '<span class="dtg">' + esc(dtg) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="tiles">' +
+        '<div class="tile">' +
+          '<span class="k">Total budget</span>' +
+          '<input class="v" id="budget" type="number" min="0" step="100" value="' + (budget || "") + '" placeholder="&mdash;" aria-label="Total budget">' +
+          '<span class="s">' + budgetSub + '</span>' +
+        '</div>' +
+        '<div class="tile">' +
+          '<span class="k">Committed</span>' +
+          '<span class="v">' + money(committed) + '</span>' +
+          '<span class="s">' + rows.length + (rows.length === 1 ? " expense" : " expenses") + '</span>' +
+        '</div>' +
+        '<div class="tile paid">' +
+          '<span class="k">Paid so far</span>' +
+          '<span class="v">' + money(paid) + '</span>' +
+          '<span class="s">' + pct + '% of committed</span>' +
+        '</div>' +
+        '<div class="tile due">' +
+          '<span class="k">Outstanding</span>' +
+          '<span class="v">' + money(bal) + '</span>' +
+          '<span class="s">balance still due</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="meter-wrap">' +
+        '<div class="meter-label"><span>Payment progress</span><span>' + pct + '%</span></div>' +
+        '<div class="meter"><div class="meter-fill" style="width:' + Math.min(pct,100) + '%"></div></div>' +
+        '<div class="meter-sub">' + money(paid) + ' paid of ' + money(committed) + ' · ' + money(bal) + ' to go</div>' +
+      '</div>';
+
+    tickerDue.textContent = money(bal);
+  }
+
+  function renderControls(){
+    var rows = effectiveRows();
+    var present = [];
+    rows.forEach(function(e){ var c = e.category || "Other"; if(present.indexOf(c) < 0) present.push(c); });
+    var ordered = CATEGORIES.filter(function(c){ return present.indexOf(c) >= 0; })
+      .concat(present.filter(function(c){ return CATEGORIES.indexOf(c) < 0; }));
+
+    var catChips = ["all"].concat(ordered).map(function(c){
+      return '<button class="chip" data-act="fcat" data-v="' + esc(c) + '" aria-pressed="' +
+        (state.filter.category === c) + '">' + (c === "all" ? "All categories" : esc(c)) + '</button>';
+    }).join("");
+
+    var statusChips = [["all","All"],["outstanding","Outstanding"],["settled","Settled"]].map(function(p){
+      return '<button class="chip" data-act="fstatus" data-v="' + p[0] + '" aria-pressed="' +
+        (state.filter.status === p[0]) + '">' + p[1] + '</button>';
+    }).join("");
+
+    controlsEl.innerHTML = '<div class="chips">' + catChips + '</div><div class="chips">' + statusChips + '</div>';
+  }
+
+  function passFilter(e){
+    if(state.filter.category !== "all" && (e.category || "Other") !== state.filter.category) return false;
+    var d = due(e);
+    if(state.filter.status === "outstanding" && d <= 0) return false;
+    if(state.filter.status === "settled" && !(d <= 0 && (+e.total||0) > 0)) return false;
+    return true;
+  }
+
+  function rowHTML(e){
+    var total = +e.total || 0, pd = +e.paid || 0, d = Math.max(total - pd, 0);
+    var settled = d <= 0 && total > 0;
+    var overdue = e.dueDate && d > 0 && new Date(e.dueDate + "T00:00") < startOfToday();
+
+    if(e._sample){
+      return '<div class="row' + (settled ? " settled" : "") + '">' +
+        '<div class="cell vend"><span class="vend-ro">' + esc(e.vendor) + '</span></div>' +
+        '<div class="cell" data-label="Total"><span class="ro">' + money(total) + '</span></div>' +
+        '<div class="cell" data-label="Paid"><span class="ro">' + money(pd) + '</span></div>' +
+        '<div class="cell due-val ' + (d > 0 ? "pos" : "zero") + '" data-label="Due">' + money(d) + '</div>' +
+        '<div class="cell" data-label="Due date"><span class="ro">' + (fmtDate(e.dueDate) || "—") + '</span></div>' +
+        '<div class="cell act"></div>' +
+      '</div>';
+    }
+
+    return '<div class="row' + (settled ? " settled" : "") + '" data-id="' + e.id + '">' +
+      '<div class="cell vend">' +
+        '<input class="vend-in" data-id="' + e.id + '" data-field="vendor" value="' + esc(e.vendor) + '" aria-label="Vendor or item">' +
+        (overdue ? '<span class="overdue">Overdue · was ' + esc(fmtDate(e.dueDate)) + '</span>' : '') +
+      '</div>' +
+      '<div class="cell" data-label="Total"><input class="num" type="number" min="0" step="1" data-id="' + e.id + '" data-field="total" value="' + total + '" aria-label="Total cost"></div>' +
+      '<div class="cell" data-label="Paid"><input class="num" type="number" min="0" step="1" data-id="' + e.id + '" data-field="paid" value="' + pd + '" aria-label="Amount paid"></div>' +
+      '<div class="cell due-val ' + (d > 0 ? "pos" : "zero") + '" data-label="Due">' + money(d) + '</div>' +
+      '<div class="cell" data-label="Due date"><input class="dt" type="date" data-id="' + e.id + '" data-field="dueDate" value="' + esc(e.dueDate || "") + '" aria-label="Balance due date"></div>' +
+      '<div class="cell act">' +
+        (d > 0 ? '<button class="icon-btn" data-act="full" data-id="' + e.id + '" title="Mark paid in full" aria-label="Mark paid in full">✓</button>' : '') +
+        '<button class="icon-btn del" data-act="del" data-id="' + e.id + '" title="Delete" aria-label="Delete expense">✕</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderLedger(){
+    var all = effectiveRows();
+    var isSample = all.length && all[0]._sample;
+    var rows = all.filter(passFilter);
+    var html = isSample
+      ? '<p class="sample-note">These are sample entries. Add your first expense above and they clear automatically.</p>'
+      : '';
+
+    if(!rows.length){
+      ledgerEl.innerHTML = html + '<p class="empty">No expenses match this filter.</p>';
+      return;
+    }
+
+    var groups = {};
+    rows.forEach(function(e){
+      var c = e.category || "Other";
+      (groups[c] = groups[c] || []).push(e);
+    });
+    var order = CATEGORIES.filter(function(c){ return groups[c]; })
+      .concat(Object.keys(groups).filter(function(c){ return CATEGORIES.indexOf(c) < 0; }));
+
+    html += order.map(function(cat){
+      var list = groups[cat];
+      var gd = list.reduce(function(a,e){ return a + due(e); }, 0);
+      return '<div class="group">' +
+        '<div class="group-h">' +
+          '<h3>' + esc(cat) + '</h3>' +
+          '<span class="gc">' + list.length + (list.length === 1 ? " item" : " items") + '</span>' +
+          '<span class="gd">' + money(gd) + ' due</span>' +
+        '</div>' +
+        '<div class="row head" aria-hidden="true"><span>Vendor / item</span><span>Total</span><span>Paid</span><span>Due</span><span>Due date</span><span></span></div>' +
+        list.map(rowHTML).join("") +
+      '</div>';
+    }).join("");
+
+    ledgerEl.innerHTML = html;
+  }
+
+  /* ---------- events ---------- */
+  CATEGORIES.forEach(function(c){
+    var o = document.createElement("option");
+    o.value = c; o.textContent = c;
+    document.getElementById("f-cat").appendChild(o);
+  });
+
+  form.addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var fd = new FormData(form);
+    var vendor = (fd.get("vendor") || "").trim();
+    if(!vendor) return;
+    addExpenseObj({
+      vendor: vendor,
+      category: fd.get("category") || "Other",
+      total: Math.max(0, +fd.get("total") || 0),
+      paid: Math.max(0, +fd.get("paid") || 0),
+      dueDate: fd.get("dueDate") || "",
+      createdAt: Date.now()
+    });
+    form.reset();
+    document.getElementById("f-vendor").focus();
+  });
+
+  ledgerEl.addEventListener("change", function(ev){
+    var t = ev.target;
+    var id = t.getAttribute("data-id"), f = t.getAttribute("data-field");
+    if(!id || !f) return;
+    var val = t.value;
+    if(f === "total" || f === "paid") val = Math.max(0, +val || 0);
+    if(f === "vendor"){ val = val.trim(); if(!val){ render(); return; } }
+    var patch = {}; patch[f] = val;
+    patchExpense(id, patch);
+  });
+
+  summaryEl.addEventListener("change", function(ev){
+    var t = ev.target;
+    if(t.id === "budget") saveSettings({ budgetTarget: Math.max(0, +t.value || 0) });
+    if(t.id === "weddingDate") saveSettings({ weddingDate: t.value });
+  });
+
+  currencySel.addEventListener("change", function(){ saveSettings({ currency: currencySel.value }); });
+
+  document.addEventListener("click", function(ev){
+    var b = ev.target.closest("[data-act]");
+    if(!b) return;
+    var act = b.getAttribute("data-act");
+    if(act === "del"){
+      if(b.getAttribute("data-armed") === "1"){
+        removeExpense(b.getAttribute("data-id"));
+      }else{
+        b.setAttribute("data-armed","1");
+        b.classList.add("armed");
+        b.textContent = "Delete?";
+        b.setAttribute("title","Click again to remove");
+        clearTimeout(b._revert);
+        b._revert = setTimeout(function(){
+          b.removeAttribute("data-armed");
+          b.classList.remove("armed");
+          b.textContent = "✕";
+          b.setAttribute("title","Delete");
+        }, 3500);
+      }
+    }else if(act === "full"){
+      var id = b.getAttribute("data-id");
+      var x = state.expenses.find(function(e){ return e.id === id; });
+      if(x) patchExpense(id, { paid: +x.total || 0 });
+    }else if(act === "fcat"){
+      state.filter.category = b.getAttribute("data-v"); renderControls(); renderLedger();
+    }else if(act === "fstatus"){
+      state.filter.status = b.getAttribute("data-v"); renderControls(); renderLedger();
+    }
+  });
+
+  /* ---------- backup: export / import ---------- */
+  var modal = document.getElementById("modal");
+  var modalTitle = document.getElementById("modalTitle");
+  var modalSub = document.getElementById("modalSub");
+  var modalText = document.getElementById("modalText");
+  var modalActions = document.getElementById("modalActions");
+
+  function mkbtn(label, fn){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "btn modal-btn"; b.textContent = label;
+    b.addEventListener("click", fn);
+    return b;
+  }
+  function blobDownload(fname, text){
+    try{
+      var blob = new Blob([text], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = fname;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+    }catch(e){ toast("Download isn't available here — copy the text instead."); }
+  }
+  function openModal(title, sub){
+    modalTitle.textContent = title;
+    modalSub.textContent = sub || "";
+    modalActions.innerHTML = "";
+    modal.classList.remove("is-hidden");
+  }
+  function closeModal(){
+    modal.classList.add("is-hidden");
+    modalActions.innerHTML = ""; modalText.value = ""; modalText.readOnly = false;
+  }
+  document.getElementById("modalClose").addEventListener("click", closeModal);
+  modal.addEventListener("click", function(e){ if(e.target === modal) closeModal(); });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && !modal.classList.contains("is-hidden")) closeModal();
+  });
+
+  function backupData(){
+    return {
+      app: "wedding-ledger", version: 1, exportedAt: new Date().toISOString(),
+      settings: {
+        currency: state.settings.currency || "$",
+        budgetTarget: +state.settings.budgetTarget || 0,
+        weddingDate: state.settings.weddingDate || ""
+      },
+      expenses: state.expenses.map(function(e){
+        return {
+          vendor: e.vendor || "", category: e.category || "Other",
+          total: +e.total || 0, paid: +e.paid || 0,
+          dueDate: e.dueDate || "", createdAt: e.createdAt || Date.now()
+        };
+      })
+    };
+  }
+
+  function doExport(){
+    var json = JSON.stringify(backupData(), null, 2);
+    var sub = "Copy this text somewhere safe, or download it as a file. Use “Import backup” on another device to restore it.";
+    if(!state.expenses.length) sub += " Note: you have no saved expenses yet, so this backup is empty.";
+    openModal("Export backup", sub);
+    modalText.readOnly = true;
+    modalText.value = json;
+    modalActions.appendChild(mkbtn("Copy", function(){
+      var ok = false;
+      try{ modalText.focus(); modalText.select(); ok = document.execCommand("copy"); }catch(e){}
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(json).then(
+          function(){ toast("Backup copied."); },
+          function(){ toast(ok ? "Backup copied." : "Select the text and copy it."); }
+        );
+      }else{
+        toast(ok ? "Backup copied." : "Select the text and copy it.");
+      }
+    }));
+    modalActions.appendChild(mkbtn("Download .json", function(){
+      var fname = "wedding-ledger-backup-" + new Date().toISOString().slice(0,10) + ".json";
+      if(window.claude && typeof window.claude.use === "function"){
+        window.claude.use("downloads").then(function(dl){
+          if(dl && dl.save){
+            dl.save({ filename: fname, data: json }).then(
+              function(){ toast("Backup saved."); },
+              function(err){ toast(err && err.code === "declined" ? "Download cancelled." : "Couldn't save — copy the text instead."); }
+            );
+          }else{
+            blobDownload(fname, json);
+          }
+        }, function(){ blobDownload(fname, json); });
+      }else{
+        blobDownload(fname, json);
+      }
+    }));
+  }
+
+  function doImport(){
+    openModal("Import backup",
+      "Paste a backup below, or choose a .json file. This replaces the expenses and settings on this device — your passcode is kept.");
+    modalText.readOnly = false;
+    modalText.value = "";
+    modalText.placeholder = '{ "app": "wedding-ledger", ... }';
+
+    var file = document.createElement("input");
+    file.type = "file"; file.accept = "application/json,.json"; file.className = "modal-file";
+    file.addEventListener("change", function(){
+      var f = file.files && file.files[0]; if(!f) return;
+      var r = new FileReader();
+      r.onload = function(){ modalText.value = String(r.result || ""); };
+      r.readAsText(f);
+    });
+    modalActions.appendChild(file);
+
+    var restore = mkbtn("Restore", function(){
+      var data;
+      try{ data = JSON.parse(modalText.value); }
+      catch(e){ toast("That doesn't look like valid backup text."); return; }
+      if(!data || data.app !== "wedding-ledger" || !Array.isArray(data.expenses)){
+        toast("Unrecognised backup format."); return;
+      }
+      if(restore.getAttribute("data-armed") !== "1"){
+        restore.setAttribute("data-armed", "1");
+        restore.classList.add("armed");
+        restore.textContent = "Replace everything — tap again";
+        setTimeout(function(){
+          restore.removeAttribute("data-armed");
+          restore.classList.remove("armed");
+          restore.textContent = "Restore";
+        }, 4000);
+        return;
+      }
+      applyImport(data);
+      closeModal();
+      toast("Backup restored.");
+    });
+    restore.classList.add("danger");
+    modalActions.appendChild(restore);
+  }
+
+  function applyImport(data){
+    var s = data.settings || {};
+    if(s.currency) state.settings.currency = s.currency;
+    state.settings.budgetTarget = Math.max(0, +s.budgetTarget || 0);
+    state.settings.weddingDate = s.weddingDate || "";
+    var list = data.expenses.map(function(e){
+      return {
+        vendor: String(e.vendor || "").slice(0, 120),
+        category: e.category || "Other",
+        total: Math.max(0, +e.total || 0),
+        paid: Math.max(0, +e.paid || 0),
+        dueDate: e.dueDate || "",
+        createdAt: +e.createdAt || Date.now()
+      };
+    });
+    if(mode === "db" && db){
+      db.doc("app/settings").set(state.settings).catch(function(){});
+      db.collection("expenses").get().then(function(snap){
+        snap.docs.forEach(function(dc){ db.doc("expenses/" + dc.id).delete().catch(function(){}); });
+        list.forEach(function(o){ db.collection("expenses").add(o).catch(function(){}); });
+      }, function(){});
+    }else{
+      list.forEach(function(o, i){
+        o.id = "e" + Date.now().toString(36) + i + Math.random().toString(36).slice(2, 5);
+      });
+      state.expenses = list;
+      persistLocal();
+      render();
+    }
+  }
+
+  document.getElementById("exportBtn").addEventListener("click", doExport);
+  document.getElementById("importBtn").addEventListener("click", doImport);
+
+  /* ---------- cloud sync (Firebase — standalone build, optional) ---------- */
+  var cloud = null, applyingRemote = false, fbUser = null;
+
+  function firebaseConfigured(){
+    var c = window.FIREBASE_CONFIG;
+    return !!(c && c.apiKey && c.projectId && c.appId && c.authDomain);
+  }
+  function cloudSettings(){
+    return {
+      currency: state.settings.currency || "$",
+      budgetTarget: +state.settings.budgetTarget || 0,
+      weddingDate: state.settings.weddingDate || ""
+    };
+  }
+  function loadFirebase(cb){
+    if(window.firebase && window.firebase.firestore){ cb(); return; }
+    var base = "https://www.gstatic.com/firebasejs/10.14.1/";
+    var files = ["firebase-app-compat.js", "firebase-auth-compat.js", "firebase-firestore-compat.js"];
+    (function next(i){
+      if(i >= files.length){ cb(); return; }
+      var s = document.createElement("script");
+      s.src = base + files[i]; s.async = false;
+      s.onload = function(){ next(i + 1); };
+      s.onerror = function(){ cb(new Error("Could not load the sync library.")); };
+      document.head.appendChild(s);
+    })(0);
+  }
+  function applyRemote(data){
+    if(!data) return;
+    applyingRemote = true;
+    if(Array.isArray(data.expenses)){
+      state.expenses = data.expenses.map(function(e){
+        return {
+          id: e.id || ("e" + Math.random().toString(36).slice(2, 9)),
+          vendor: e.vendor || "", category: e.category || "Other",
+          total: +e.total || 0, paid: +e.paid || 0,
+          dueDate: e.dueDate || "", createdAt: +e.createdAt || 0
+        };
+      });
+    }
+    if(data.settings){
+      var s = data.settings;
+      if(s.currency) state.settings.currency = s.currency;
+      state.settings.budgetTarget = +s.budgetTarget || 0;
+      state.settings.weddingDate = s.weddingDate || "";
+    }
+    saveLocal();
+    render();
+    applyingRemote = false;
+  }
+  function cloudPush(){
+    if(!cloud || applyingRemote) return;
+    clearTimeout(cloud.t);
+    cloud.t = setTimeout(function(){
+      cloud.ref.set({
+        expenses: state.expenses,
+        settings: cloudSettings(),
+        updatedAt: Date.now()
+      }).catch(function(){ toast("Sync failed — your change is saved on this device."); });
+    }, 700);
+  }
+  function startCloud(uid){
+    cloud = { ref: window.firebase.firestore().doc("wallets/" + uid), t: null };
+    cloud.ref.get().then(function(snap){
+      var d = snap.exists ? snap.data() : null;
+      if(!d || !Array.isArray(d.expenses) || (!d.expenses.length && state.expenses.length)){
+        cloud.ref.set({ expenses: state.expenses, settings: cloudSettings(), updatedAt: Date.now() })
+          .then(function(){ toast("This device's budget is now synced to your account."); })
+          .catch(function(){});
+      }else{
+        applyRemote(d);
+      }
+      cloud.ref.onSnapshot(function(s){ if(s.exists) applyRemote(s.data()); }, function(){});
+    }, function(){ toast("Couldn't reach sync — showing this device's data."); });
+  }
+  function showAccount(user){
+    var lb = document.getElementById("lockBtn");
+    var chip = document.getElementById("acctChip");
+    if(lb) lb.classList.add("is-hidden");
+    if(chip){
+      chip.classList.remove("is-hidden");
+      chip.querySelector(".acct-email").textContent = user.email || "Signed in";
+    }
+    if(saveNote) saveNote.textContent = "Synced to your Google account.";
+  }
+  (function wireSignOut(){
+    var so = document.getElementById("signOutBtn");
+    if(!so) return;
+    so.addEventListener("click", function(){
+      try{ window.firebase.auth().signOut().then(function(){ location.reload(); }, function(){ location.reload(); }); }
+      catch(e){ location.reload(); }
+    });
+  })();
+
+  function firebaseGate(){
+    var lockEl = document.getElementById("lock");
+    var cloudBox = document.getElementById("lockCloud");
+    var formEl = document.getElementById("lockForm");
+    var resetEl = document.getElementById("lockReset");
+    var subEl = document.getElementById("lockSub");
+    formEl.classList.add("is-hidden");
+    resetEl.classList.add("is-hidden");
+    cloudBox.classList.remove("is-hidden");
+    subEl.textContent = "Sign in to load your wedding budget on any device.";
+    cloudBox.innerHTML =
+      '<button type="button" class="btn gbtn" id="gBtn">Sign in with Google</button>' +
+      '<p class="lock-err is-hidden" id="gErr" role="alert"></p>' +
+      '<button type="button" class="lock-reset" id="gLocal" style="display:block">Use on this device only</button>';
+    var gBtn = document.getElementById("gBtn");
+    var gErr = document.getElementById("gErr");
+    document.getElementById("gLocal").addEventListener("click", function(){
+      window.__localOnly = true;
+      cloudBox.classList.add("is-hidden");
+      formEl.classList.remove("is-hidden");
+      gate();
+    });
+    gBtn.textContent = "Loading…"; gBtn.disabled = true;
+    loadFirebase(function(err){
+      if(err){
+        gErr.textContent = "Couldn't load sync. Check your connection and retry.";
+        gErr.classList.remove("is-hidden");
+        gBtn.textContent = "Retry"; gBtn.disabled = false;
+        gBtn.onclick = function(){ firebaseGate(); };
+        return;
+      }
+      try{
+        if(!window.firebase.apps.length) window.firebase.initializeApp(window.FIREBASE_CONFIG);
+      }catch(e){
+        gErr.textContent = "The sync configuration looks invalid.";
+        gErr.classList.remove("is-hidden");
+        gBtn.disabled = true;
+        return;
+      }
+      var auth = window.firebase.auth();
+      gBtn.textContent = "Sign in with Google"; gBtn.disabled = false;
+      gBtn.onclick = function(){
+        gErr.classList.add("is-hidden");
+        var prov = new window.firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(prov).catch(function(e){
+          var code = e && e.code;
+          if(code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") return;
+          if(code === "auth/popup-blocked" || code === "auth/operation-not-supported-in-this-environment"){
+            auth.signInWithRedirect(prov);
+            return;
+          }
+          gErr.textContent = (e && e.message) || "Sign-in failed.";
+          gErr.classList.remove("is-hidden");
+        });
+      };
+      auth.onAuthStateChanged(function(user){
+        if(user){
+          fbUser = user;
+          lockEl.classList.add("is-hidden");
+          showAccount(user);
+          if(!appStarted){ appStarted = true; startApp(); }
+          startCloud(user.uid);
+        }else{
+          fbUser = null; cloud = null;
+        }
+      });
+    });
+  }
+
+  /* ---------- passcode gate ---------- */
+  var LS_HASH = "wedledger.passHash", LS_TRUST = "wedledger.trust";
+  var knownHash = null, appStarted = false, creating = false;
+
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+  function sha256(str){
+    var data = new TextEncoder().encode("wedledger::" + str);
+    if(window.crypto && crypto.subtle && crypto.subtle.digest){
+      return crypto.subtle.digest("SHA-256", data).then(function(buf){
+        var out = "", v = new Uint8Array(buf), i;
+        for(i = 0; i < v.length; i++) out += ("0" + v[i].toString(16)).slice(-2);
+        return out;
+      });
+    }
+    var h = 5381; for(var i = 0; i < str.length; i++){ h = ((h << 5) + h) ^ str.charCodeAt(i); }
+    return Promise.resolve("x" + (h >>> 0).toString(16));
+  }
+
+  function persistPassHash(hash){
+    state.settings.passHash = hash;
+    if(hash) lsSet(LS_HASH, hash); else lsDel(LS_HASH);
+    try{ localStorage.setItem("wedledger.settings", JSON.stringify(state.settings)); }catch(e){}
+    if(mode === "db" && db){
+      db.doc("app/settings").set(state.settings).catch(function(){});
+    }else if(window.claude && window.claude.use){
+      window.claude.use("db").then(function(d){
+        if(d) d.doc("app/settings").set(state.settings).catch(function(){});
+      }).catch(function(){});
+    }
+  }
+
+  function gate(){
+    if(!window.claude && firebaseConfigured() && !window.__localOnly){
+      firebaseGate();
+      return;
+    }
+    var lockEl = document.getElementById("lock");
+    var lockForm = document.getElementById("lockForm");
+    var lockPass = document.getElementById("lockPass");
+    var lockPass2 = document.getElementById("lockPass2");
+    var lockTrust = document.getElementById("lockTrust");
+    var lockSub = document.getElementById("lockSub");
+    var lockErr = document.getElementById("lockErr");
+    var lockGo = document.getElementById("lockGo");
+    var lockReset = document.getElementById("lockReset");
+    var lockBtn = document.getElementById("lockBtn");
+    var card = lockEl.querySelector(".lock-card");
+
+    function err(msg){
+      lockErr.textContent = msg; lockErr.classList.remove("is-hidden");
+      card.classList.remove("lock-shake"); void card.offsetWidth; card.classList.add("lock-shake");
+    }
+    function createMode(){
+      creating = true;
+      lockSub.textContent = "Create a passcode — you'll enter it each time you open this page.";
+      lockPass.placeholder = "New passcode";
+      lockPass.setAttribute("autocomplete", "new-password");
+      lockPass2.classList.remove("is-hidden");
+      lockGo.textContent = "Set passcode & continue";
+      lockReset.classList.add("is-hidden");
+    }
+    function enterMode(){
+      creating = false;
+      lockSub.textContent = "Enter your passcode to continue.";
+      lockPass.placeholder = "Passcode";
+      lockPass.setAttribute("autocomplete", "current-password");
+      lockPass2.classList.add("is-hidden");
+      lockGo.textContent = "Unlock";
+      lockReset.classList.remove("is-hidden");
+    }
+    function open(){
+      lockErr.classList.add("is-hidden");
+      lockPass.value = ""; lockPass2.value = "";
+      lockEl.classList.remove("is-hidden");
+      try{ lockPass.focus(); }catch(e){}
+    }
+    function unlock(){
+      if(lockTrust.checked && knownHash) lsSet(LS_TRUST, knownHash); else lsDel(LS_TRUST);
+      lockEl.classList.add("is-hidden");
+      lockPass.value = ""; lockPass2.value = "";
+      if(!appStarted){ appStarted = true; startApp(); }
+    }
+
+    lockForm.addEventListener("submit", function(ev){
+      ev.preventDefault();
+      var p = lockPass.value || "";
+      if(creating){
+        if(p.length < 4){ err("Use at least 4 characters."); return; }
+        if(p !== (lockPass2.value || "")){ err("The two entries don't match."); return; }
+        sha256(p).then(function(h){ knownHash = h; persistPassHash(h); unlock(); });
+      }else{
+        sha256(p).then(function(h){
+          if(h === knownHash) unlock();
+          else err("Incorrect passcode.");
+        });
+      }
+    });
+
+    lockReset.addEventListener("click", function(){
+      if(lockReset.getAttribute("data-armed") === "1"){
+        knownHash = null; persistPassHash("");
+        lockReset.removeAttribute("data-armed"); lockReset.classList.remove("armed");
+        lockReset.textContent = "Reset passcode";
+        createMode();
+        try{ lockPass.focus(); }catch(e){}
+      }else{
+        lockReset.setAttribute("data-armed", "1");
+        lockReset.classList.add("armed");
+        lockReset.textContent = "This keeps your data — click again to reset";
+        setTimeout(function(){
+          lockReset.removeAttribute("data-armed"); lockReset.classList.remove("armed");
+          lockReset.textContent = "Reset passcode";
+        }, 4000);
+      }
+    });
+
+    if(lockBtn){
+      lockBtn.addEventListener("click", function(){ lsDel(LS_TRUST); enterMode(); open(); });
+    }
+
+    var localHash = lsGet(LS_HASH) || (state.settings.passHash || "");
+    if(localHash){
+      knownHash = localHash;
+      if(lsGet(LS_TRUST) === localHash) unlock();
+      else { enterMode(); open(); }
+      if(window.claude && window.claude.use){
+        window.claude.use("db").then(function(d){
+          if(!d) return;
+          d.doc("app/settings").get().then(function(snap){
+            var ph = snap.exists && snap.data() ? (snap.data().passHash || "") : "";
+            if(ph && ph !== knownHash){ knownHash = ph; lsSet(LS_HASH, ph); }
+          }, function(){});
+        }, function(){});
+      }
+    }else if(window.claude && window.claude.use){
+      lockSub.textContent = "Checking…";
+      var done = false;
+      var to = setTimeout(function(){ if(!done){ done = true; createMode(); open(); } }, 2500);
+      window.claude.use("db").then(function(d){
+        if(done) return;
+        if(!d){ done = true; clearTimeout(to); createMode(); open(); return; }
+        d.doc("app/settings").get().then(function(snap){
+          if(done) return; done = true; clearTimeout(to);
+          var ph = snap.exists && snap.data() ? (snap.data().passHash || "") : "";
+          if(ph){ knownHash = ph; lsSet(LS_HASH, ph); enterMode(); }
+          else createMode();
+          open();
+        }, function(){ if(!done){ done = true; clearTimeout(to); createMode(); open(); } });
+      }, function(){ if(!done){ done = true; clearTimeout(to); createMode(); open(); } });
+    }else{
+      createMode(); open();
+    }
+  }
+
+  /* ---------- boot ---------- */
+  loadLocal();
+
+  function startApp(){
+    render();
+    if(window.claude && typeof window.claude.use === "function"){
+      window.claude.use("db").then(function(d){
+        if(!d) return;
+        db = d; mode = "db";
+        state.expenses = [];
+        db.collection("expenses").onSnapshot(function(snap){
+          state.expenses = snap.docs.map(function(dc){
+            var o = Object.assign({}, dc.data() || {}); o.id = dc.id; return o;
+          });
+          state.expenses.sort(function(a,b){ return (a.createdAt||0) - (b.createdAt||0); });
+          render();
+        }, function(){ mode = "local"; loadLocal(); render(); });
+        db.doc("app/settings").onSnapshot(function(snap){
+          if(snap.exists){
+            var s = snap.data() || {};
+            for(var k in s) state.settings[k] = s[k];
+            if(s.passHash && s.passHash !== knownHash){ knownHash = s.passHash; lsSet(LS_HASH, s.passHash); }
+          }
+          render();
+        }, function(){});
+      }).catch(function(){});
+    }
+  }
+
+  gate();
+})();
+</script>
+</body>
+</html>
