@@ -13,12 +13,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>html{background:#F6F3F7;-webkit-text-size-adjust:100%}@media (prefers-color-scheme:dark){html:not([data-theme="light"]){background:#161020}}html[data-theme="dark"]{background:#161020}</style>
 <script>
-  /* ============================================================
-     CROSS-DEVICE SYNC (optional). Leave the values blank to keep
-     this page device-only. To turn on "Sign in with Google" sync,
-     paste your Firebase web-app config values between the quotes.
-     Setup guide: see SYNC-SETUP.md
-     ============================================================ */
+  /* Cross-device sync config (Firebase). Not a secret. */
   window.FIREBASE_CONFIG = {
     apiKey: "AIzaSyDowGxEy8153VtqNNtsGjPInJ6Jgcf3Gmg",
     authDomain: "wedding-ledger-c1a11.firebaseapp.com",
@@ -225,6 +220,7 @@
   .acctchip .acct-email{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #lockCloud{display:flex;flex-direction:column;gap:12px}
   #lockCloud .gbtn{width:100%;height:44px;display:inline-flex;align-items:center;justify-content:center;gap:9px}
+  .lock-signed{font-size:.8rem;color:var(--muted);margin:0 0 2px}
   .lock{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;background:var(--ground)}
   .lock-card{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--line);
     border-radius:18px;box-shadow:var(--shadow);padding:34px 28px;text-align:center}
@@ -981,22 +977,24 @@
         expenses: state.expenses,
         settings: cloudSettings(),
         updatedAt: Date.now()
-      }).catch(function(){ toast("Sync failed — your change is saved on this device."); });
+      }, { merge: true }).catch(function(){ toast("Sync failed — your change is saved on this device."); });
     }, 700);
   }
-  function startCloud(uid){
+  function startCloud(uid, preSnap){
     cloud = { ref: window.firebase.firestore().doc("wallets/" + uid), t: null };
-    cloud.ref.get().then(function(snap){
-      var d = snap.exists ? snap.data() : null;
+    function handle(snap){
+      var d = snap && snap.exists ? snap.data() : null;
       if(!d || !Array.isArray(d.expenses) || (!d.expenses.length && state.expenses.length)){
-        cloud.ref.set({ expenses: state.expenses, settings: cloudSettings(), updatedAt: Date.now() })
+        cloud.ref.set({ expenses: state.expenses, settings: cloudSettings(), updatedAt: Date.now() }, { merge: true })
           .then(function(){ toast("This device's budget is now synced to your account."); })
           .catch(function(){});
       }else{
         applyRemote(d);
       }
       cloud.ref.onSnapshot(function(s){ if(s.exists) applyRemote(s.data()); }, function(){});
-    }, function(){ toast("Couldn't reach sync — showing this device's data."); });
+    }
+    if(preSnap){ handle(preSnap); }
+    else{ cloud.ref.get().then(handle, function(){ toast("Couldn't reach sync — showing this device's data."); }); }
   }
   function showAccount(user){
     var lb = document.getElementById("lockBtn");
@@ -1017,71 +1015,195 @@
     });
   })();
 
+  var fbAuth = null;
+
   function firebaseGate(){
     var lockEl = document.getElementById("lock");
     var cloudBox = document.getElementById("lockCloud");
     var formEl = document.getElementById("lockForm");
     var resetEl = document.getElementById("lockReset");
     var subEl = document.getElementById("lockSub");
+    var cardEl = lockEl.querySelector(".lock-card");
+    var passEl = document.getElementById("lockPass");
+    var pass2El = document.getElementById("lockPass2");
+    var trustEl = document.getElementById("lockTrust");
+    var goEl = document.getElementById("lockGo");
+    var errEl = document.getElementById("lockErr");
+
     formEl.classList.add("is-hidden");
     resetEl.classList.add("is-hidden");
     cloudBox.classList.remove("is-hidden");
-    subEl.textContent = "Sign in to load your wedding budget on any device.";
-    cloudBox.innerHTML =
-      '<button type="button" class="btn gbtn" id="gBtn">Sign in with Google</button>' +
-      '<p class="lock-err is-hidden" id="gErr" role="alert"></p>' +
-      '<button type="button" class="lock-reset" id="gLocal" style="display:block">Use on this device only</button>';
-    var gBtn = document.getElementById("gBtn");
-    var gErr = document.getElementById("gErr");
-    document.getElementById("gLocal").addEventListener("click", function(){
-      window.__localOnly = true;
-      cloudBox.classList.add("is-hidden");
-      formEl.classList.remove("is-hidden");
-      gate();
-    });
-    gBtn.textContent = "Loading…"; gBtn.disabled = true;
-    loadFirebase(function(err){
-      if(err){
-        gErr.textContent = "Couldn't load sync. Check your connection and retry.";
-        gErr.classList.remove("is-hidden");
-        gBtn.textContent = "Retry"; gBtn.disabled = false;
-        gBtn.onclick = function(){ firebaseGate(); };
-        return;
-      }
-      try{
-        if(!window.firebase.apps.length) window.firebase.initializeApp(window.FIREBASE_CONFIG);
-      }catch(e){
-        gErr.textContent = "The sync configuration looks invalid.";
-        gErr.classList.remove("is-hidden");
-        gBtn.disabled = true;
-        return;
-      }
-      var auth = window.firebase.auth();
-      gBtn.textContent = "Sign in with Google"; gBtn.disabled = false;
+
+    function shake(msg){
+      errEl.textContent = msg; errEl.classList.remove("is-hidden");
+      cardEl.classList.remove("lock-shake"); void cardEl.offsetWidth; cardEl.classList.add("lock-shake");
+    }
+    function signOut(){
+      if(fbAuth) fbAuth.signOut().then(function(){ location.reload(); }, function(){ location.reload(); });
+      else location.reload();
+    }
+    function wireOut(scope){
+      (scope || document).querySelectorAll("[data-signout]").forEach(function(b){ b.onclick = signOut; });
+    }
+
+    function showGoogle(msg){
+      subEl.textContent = "Sign in to open your wedding ledger.";
+      formEl.classList.add("is-hidden");
+      resetEl.classList.add("is-hidden");
+      cloudBox.classList.remove("is-hidden");
+      cloudBox.innerHTML =
+        '<button type="button" class="btn gbtn" id="gBtn">Sign in with Google</button>' +
+        '<p class="lock-err is-hidden" id="gErr" role="alert"></p>' +
+        '<button type="button" class="lock-reset" id="gLocal" style="display:block">Use on this device only</button>';
+      var gBtn = document.getElementById("gBtn");
+      var gErr = document.getElementById("gErr");
+      if(msg){ gErr.textContent = msg; gErr.classList.remove("is-hidden"); }
+      document.getElementById("gLocal").onclick = function(){
+        window.__localOnly = true;
+        cloudBox.classList.add("is-hidden");
+        formEl.classList.remove("is-hidden");
+        gate();
+      };
       gBtn.onclick = function(){
         gErr.classList.add("is-hidden");
+        if(!window.firebase || !fbAuth){ firebaseGate(); return; }
         var prov = new window.firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(prov).catch(function(e){
+        fbAuth.signInWithPopup(prov).catch(function(e){
           var code = e && e.code;
           if(code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") return;
           if(code === "auth/popup-blocked" || code === "auth/operation-not-supported-in-this-environment"){
-            auth.signInWithRedirect(prov);
-            return;
+            fbAuth.signInWithRedirect(prov); return;
           }
           gErr.textContent = (e && e.message) || "Sign-in failed.";
           gErr.classList.remove("is-hidden");
         });
       };
-      auth.onAuthStateChanged(function(user){
-        if(user){
-          fbUser = user;
-          lockEl.classList.add("is-hidden");
-          showAccount(user);
-          if(!appStarted){ appStarted = true; startApp(); }
-          startCloud(user.uid);
+    }
+
+    function showDenied(user){
+      formEl.classList.add("is-hidden");
+      resetEl.classList.add("is-hidden");
+      cloudBox.classList.remove("is-hidden");
+      subEl.textContent = "";
+      cloudBox.innerHTML =
+        '<p class="lock-sub">This ledger is private. The account <b>' + esc(user.email || "") +
+        '</b> is not on the allow list.</p>' +
+        '<button type="button" class="btn gbtn" data-signout>Sign out</button>';
+      wireOut(cloudBox);
+    }
+
+    function enterApp(user, ref, snap){
+      lockEl.classList.add("is-hidden");
+      formEl.classList.add("is-hidden");
+      showAccount(user);
+      if(!appStarted){ appStarted = true; startApp(); }
+      startCloud(user.uid, snap);
+    }
+
+    function passcodeStep(user, ref, existingHash, snap){
+      if(existingHash && lsGet("wedledger.cloudTrust") === existingHash){
+        enterApp(user, ref, snap); return;
+      }
+      var makeNew = !existingHash;
+      cloudBox.classList.remove("is-hidden");
+      cloudBox.innerHTML = '<p class="lock-signed">Signed in as ' + esc(user.email || "") +
+        ' &middot; <button type="button" class="linkbtn" data-signout>Sign out</button></p>';
+      wireOut(cloudBox);
+      formEl.classList.remove("is-hidden");
+      errEl.classList.add("is-hidden");
+      passEl.value = ""; pass2El.value = "";
+      if(makeNew){
+        subEl.textContent = "Create a passcode. You'll use it to open the ledger from now on.";
+        passEl.placeholder = "New passcode";
+        pass2El.classList.remove("is-hidden");
+        goEl.textContent = "Set passcode";
+        resetEl.classList.add("is-hidden");
+      }else{
+        subEl.textContent = "Enter your passcode.";
+        passEl.placeholder = "Passcode";
+        pass2El.classList.add("is-hidden");
+        goEl.textContent = "Unlock";
+        resetEl.classList.remove("is-hidden");
+        resetEl.textContent = "Reset passcode";
+      }
+      try{ passEl.focus(); }catch(e){}
+
+      formEl.onsubmit = function(ev){
+        ev.preventDefault();
+        var p = passEl.value || "";
+        if(makeNew){
+          if(p.length < 4){ shake("Use at least 4 characters."); return; }
+          if(p !== (pass2El.value || "")){ shake("The two entries don't match."); return; }
+          sha256(p).then(function(h){
+            ref.set({ appPasscode: h }, { merge: true }).then(function(){
+              lsSet("wedledger.passHash", h);
+              if(trustEl.checked) lsSet("wedledger.cloudTrust", h); else lsDel("wedledger.cloudTrust");
+              enterApp(user, ref, snap);
+            }, function(){ shake("Couldn't save the passcode. Try again."); });
+          });
         }else{
-          fbUser = null; cloud = null;
+          sha256(p).then(function(h){
+            if(h === existingHash){
+              if(trustEl.checked) lsSet("wedledger.cloudTrust", h); else lsDel("wedledger.cloudTrust");
+              enterApp(user, ref, snap);
+            }else shake("Incorrect passcode.");
+          });
         }
+      };
+
+      resetEl.onclick = function(){
+        if(resetEl.getAttribute("data-armed") === "1"){
+          ref.set({ appPasscode: "" }, { merge: true }).then(function(){
+            lsDel("wedledger.cloudTrust"); lsDel("wedledger.passHash");
+            resetEl.removeAttribute("data-armed");
+            passcodeStep(user, ref, "", snap);
+          }, function(){ shake("Couldn't reset. Try again."); });
+        }else{
+          resetEl.setAttribute("data-armed", "1");
+          resetEl.textContent = "You're signed in — click again to reset";
+          setTimeout(function(){
+            resetEl.removeAttribute("data-armed");
+            resetEl.textContent = "Reset passcode";
+          }, 4000);
+        }
+      };
+    }
+
+    function afterSignIn(user){
+      fbUser = user;
+      formEl.classList.add("is-hidden");
+      resetEl.classList.add("is-hidden");
+      cloudBox.classList.remove("is-hidden");
+      subEl.textContent = "";
+      cloudBox.innerHTML = '<p class="lock-sub">Checking access…</p>';
+      var ref = window.firebase.firestore().doc("wallets/" + user.uid);
+      ref.get().then(function(snap){
+        var hash = (snap.exists && snap.data() && snap.data().appPasscode) || "";
+        passcodeStep(user, ref, hash, snap);
+      }, function(e){
+        if(e && e.code === "permission-denied"){ showDenied(user); return; }
+        cloudBox.innerHTML = '<p class="lock-sub">Couldn\'t reach the server. Check your connection.</p>' +
+          '<button type="button" class="btn gbtn" id="retryBtn">Retry</button>' +
+          '<button type="button" class="lock-reset" data-signout style="display:block">Sign out</button>';
+        document.getElementById("retryBtn").onclick = function(){ afterSignIn(user); };
+        wireOut(cloudBox);
+      });
+    }
+
+    subEl.textContent = "";
+    cloudBox.innerHTML = '<p class="lock-sub">Loading…</p>';
+    loadFirebase(function(err){
+      if(err){ showGoogle("Couldn't load sync. Check your connection, then retry."); return; }
+      try{
+        if(!window.firebase.apps.length) window.firebase.initializeApp(window.FIREBASE_CONFIG);
+      }catch(e){
+        cloudBox.innerHTML = '<p class="lock-sub">The sync configuration looks invalid.</p>';
+        return;
+      }
+      fbAuth = window.firebase.auth();
+      fbAuth.onAuthStateChanged(function(user){
+        if(user){ afterSignIn(user); }
+        else{ fbUser = null; cloud = null; showGoogle(); }
       });
     });
   }
