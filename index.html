@@ -227,6 +227,7 @@
   .method{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
     color:var(--muted);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;
     padding:2px 7px;vertical-align:middle;margin-left:4px}
+  .method-open{border-style:dashed;opacity:.85}
   .pmt-top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;
     background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;
     margin-bottom:14px;box-shadow:var(--shadow)}
@@ -564,19 +565,25 @@
   /* ---------- normalise / migrate ---------- */
   function normPayment(p){
     p = p || {};
+    var method = p.method || "";
+    var note = p.note || "";
+    // self-heal payments auto-created by an earlier migration
+    if((note === "Earlier payments" || note === "Opening balance") && (method === "Other" || method === "")){
+      method = ""; note = "Opening balance";
+    }
     return {
       id: p.id || uid("pay-"),
       amount: Math.max(0, +p.amount || 0),
       date: p.date || "",
-      method: p.method || "Other",
-      note: p.note || ""
+      method: method,
+      note: note
     };
   }
   function normExpense(x){
     x = x || {};
     var payments = Array.isArray(x.payments) ? x.payments.map(normPayment) : [];
     if(!payments.length && +x.paid > 0){
-      payments = [ normPayment({ amount: +x.paid, date: x.paidDate || "", method: x.method || "Other", note: "Earlier payments" }) ];
+      payments = [ normPayment({ amount: +x.paid, date: "", method: "", note: "Opening balance" }) ];
     }
     return {
       id: x.id || uid("exp-"),
@@ -639,7 +646,7 @@
     var raw = null;
     try{ raw = localStorage.getItem("wedledger.v2"); }catch(e){}
     if(raw){
-      try{ state.data = migrateBlob(JSON.parse(raw)); ensureEvent(); return; }catch(e){}
+      try{ state.data = migrateBlob(JSON.parse(raw)); ensureEvent(); saveLocal(); return; }catch(e){}
     }
     var legacy = { expenses: [], settings: {} };
     try{ legacy.expenses = JSON.parse(localStorage.getItem("wedledger.expenses") || "[]"); }catch(e){}
@@ -648,6 +655,7 @@
       state.data = migrateBlob(legacy);
     }
     ensureEvent();
+    saveLocal();
   }
   function dbPush(){
     if(!(mode === "db" && db) || applyingRemote) return;
@@ -910,8 +918,8 @@
     var inner = pays.length ? pays.map(function(p){
       return '<div class="pd-row">' +
         '<span class="pd-date">' + (p.date ? esc(fmtDate(p.date)) : "—") + '</span>' +
-        '<span class="method" style="margin:0">' + esc(p.method || "Other") + '</span>' +
-        (p.note ? '<span class="pd-note">' + esc(p.note) + '</span>' : '<span></span>') +
+        '<span class="method' + (p.method ? "" : " method-open") + '" style="margin:0">' + esc(p.method || "opening") + '</span>' +
+        (p.note && p.note !== "Opening balance" ? '<span class="pd-note">' + esc(p.note) + '</span>' : '<span></span>') +
         '<span class="pd-amt">' + money(+p.amount || 0) + '</span>' +
       '</div>';
     }).join("") : '<div class="pd-empty">No payments recorded yet.</div>';
@@ -966,7 +974,7 @@
     rows.forEach(function(e){
       (e.payments || []).forEach(function(p){
         pays.push({
-          amount: +p.amount || 0, date: p.date || "", method: p.method || "Other", note: p.note || "",
+          amount: +p.amount || 0, date: p.date || "", method: p.method || "", note: p.note || "",
           vendor: e.vendor, expId: e.id, payId: p.id, _sample: e._sample
         });
       });
@@ -982,7 +990,7 @@
     var byM = {};
     pays.forEach(function(p){ byM[p.method] = (byM[p.method] || 0) + p.amount; });
     var breakdown = Object.keys(byM).map(function(m){
-      return '<span><span class="method" style="margin:0">' + esc(m) + '</span> ' + money(byM[m]) + '</span>';
+      return '<span><span class="method' + (m ? "" : " method-open") + '" style="margin:0">' + esc(m || "opening") + '</span> ' + money(byM[m]) + '</span>';
     }).join("");
 
     var groups = {};
@@ -1008,8 +1016,8 @@
         list.map(function(p){
           return '<div class="pmt-row">' +
             '<span class="pmt-date">' + (p.date ? esc(fmtDate(p.date)) : "—") + '</span>' +
-            '<span class="pmt-vend">' + esc(p.vendor || "—") + '<span class="method">' + esc(p.method) + '</span>' +
-              (p.note ? ' <span class="pmt-note">' + esc(p.note) + '</span>' : '') + '</span>' +
+            '<span class="pmt-vend">' + esc(p.vendor || "—") + '<span class="method' + (p.method ? "" : " method-open") + '">' + esc(p.method || "opening") + '</span>' +
+              (p.note && p.note !== "Opening balance" ? ' <span class="pmt-note">' + esc(p.note) + '</span>' : '') + '</span>' +
             '<span class="pmt-amt">' + money(p.amount) + '</span>' +
             (p._sample ? '<span></span>'
               : '<button class="icon-btn del" data-act="delpay" data-id="' + p.expId + '" data-pay="' + p.payId + '" title="Delete payment" aria-label="Delete payment">✕</button>') +
@@ -1078,6 +1086,7 @@
         var v = t.value;
         if(pf === "amount") v = Math.max(0, +v || 0);
         var patch = {}; patch[pf] = v;
+        if(pf === "method" && v) patch.note = "";
         patchPayment(expId, payId, patch);
         openPaymentsModal(expId);
       }
@@ -1105,7 +1114,8 @@
       return '<div class="pay-row" data-pay="' + p.id + '">' +
         '<input class="dt" type="date" data-pf="date" value="' + esc(p.date || "") + '" aria-label="Payment date">' +
         '<select data-pf="method" aria-label="Method">' +
-          METHODS.map(function(m){ return '<option' + (m === p.method ? " selected" : "") + ">" + esc(m) + "</option>"; }).join("") +
+          (METHODS.indexOf(p.method) < 0 ? '<option value="" selected>Opening balance</option>' : '') +
+          METHODS.map(function(m){ return '<option value="' + esc(m) + '"' + (m === p.method ? " selected" : "") + ">" + esc(m) + "</option>"; }).join("") +
         '</select>' +
         '<input class="num" type="number" min="0" step="1" data-pf="amount" value="' + (+p.amount || 0) + '" aria-label="Amount">' +
         '<button class="icon-btn del" data-act="delpay" data-id="' + x.id + '" data-pay="' + p.id + '" title="Delete payment" aria-label="Delete payment">✕</button>' +
@@ -1120,7 +1130,7 @@
           '<input id="pa-amt" type="number" min="0" step="1" placeholder="Amount" value="' + (d > 0 ? d : "") + '" aria-label="New payment amount">' +
           '<input id="pa-date" type="date" value="' + todayStr() + '" aria-label="New payment date">' +
           '<select id="pa-method" aria-label="New payment method">' +
-            METHODS.map(function(m){ return "<option>" + esc(m) + "</option>"; }).join("") +
+            METHODS.map(function(m){ return '<option value="' + esc(m) + '">' + esc(m) + "</option>"; }).join("") +
           '</select>' +
           '<input id="pa-note" placeholder="Note (optional)" aria-label="Note">' +
         '</div>' +
@@ -1278,7 +1288,7 @@
   });
   METHODS.forEach(function(m){
     var o = document.createElement("option");
-    o.textContent = m;
+    o.value = m; o.textContent = m;
     document.getElementById("f-method").appendChild(o);
   });
 
