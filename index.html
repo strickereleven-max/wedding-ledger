@@ -184,6 +184,21 @@
   .ro{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.98rem;color:var(--ink);padding:8px;
     display:inline-block;font-variant-numeric:tabular-nums}
   .pcount{display:block;font-size:.64rem;color:var(--muted);padding:0 8px;margin-top:1px}
+  .pcount-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:0;cursor:pointer;
+    font-size:.64rem;color:var(--muted);padding:0 8px;margin-top:2px;text-align:left}
+  .pcount-btn:hover{color:var(--ink)}
+  .pcount-btn .chev{font-size:.7rem;line-height:1;transition:transform .15s}
+  .pcount-btn[aria-expanded="true"] .chev{transform:rotate(90deg)}
+  .row-detail{background:var(--surface-2);border-top:1px solid var(--line);
+    padding:9px 16px 12px;display:flex;flex-direction:column;gap:3px}
+  .pd-row{display:grid;grid-template-columns:auto auto 1fr auto;gap:12px;align-items:center;
+    font-size:.86rem;padding:4px 0}
+  .pd-date{font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--muted);white-space:nowrap}
+  .pd-note{font-size:.78rem;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pd-amt{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600;
+    font-variant-numeric:tabular-nums;text-align:right}
+  .pd-empty{font-size:.82rem;color:var(--muted);padding:2px 0}
+  .pd-edit{align-self:flex-start;margin-top:5px}
   .dt{font-size:.92rem;color:var(--ink);width:100%;border:1px solid transparent;background:transparent;
     border-radius:8px;padding:7px 6px}
   .dt:hover{border-color:var(--line)}
@@ -308,6 +323,8 @@
     .pay-add{grid-template-columns:1fr}
     .pay-row{grid-template-columns:1fr 1fr;gap:8px 8px}
     .pay-row .icon-btn{grid-column:2;justify-self:end}
+    .pd-row{grid-template-columns:auto 1fr auto;gap:8px}
+    .pd-note{display:none}
   }
   @media (max-width:720px){
     .row{grid-template-columns:1fr 1fr;gap:11px 12px;padding:13px 14px}
@@ -452,7 +469,8 @@
   var state = {
     data: { events: [], currentId: "" },
     filter: { category: "all", status: "all" },
-    view: "ledger"
+    view: "ledger",
+    open: {}
   };
   var db = null, mode = "local";
   var cloud = null, applyingRemote = false, fbUser = null, fbAuth = null;
@@ -858,13 +876,33 @@
         (overdue ? '<span class="overdue">Overdue · was ' + esc(fmtDate(e.dueDate)) + '</span>' : '') +
       '</div>' +
       '<div class="cell" data-label="Total"><input class="num" type="number" min="0" step="1" data-id="' + e.id + '" data-field="total" value="' + total + '" aria-label="Total cost"></div>' +
-      '<div class="cell" data-label="Paid"><span class="ro">' + money(pd) + '</span><span class="pcount">' + pcount + '</span></div>' +
+      '<div class="cell" data-label="Paid"><span class="ro">' + money(pd) + '</span>' +
+        '<button class="pcount-btn" data-act="toggle" data-id="' + e.id + '" aria-expanded="' + (state.open[e.id] ? "true" : "false") + '">' +
+          '<span class="chev">&#9656;</span>' + pcount +
+        '</button>' +
+      '</div>' +
       '<div class="cell due-val ' + (d > 0 ? "pos" : "zero") + '" data-label="Due">' + money(d) + '</div>' +
       '<div class="cell" data-label="Due date"><input class="dt" type="date" data-id="' + e.id + '" data-field="dueDate" value="' + esc(e.dueDate || "") + '" aria-label="Balance due date"></div>' +
       '<div class="cell act">' +
         '<button class="icon-btn" data-act="pay" data-id="' + e.id + '" title="Payments" aria-label="Payments">＋</button>' +
         '<button class="icon-btn del" data-act="del" data-id="' + e.id + '" title="Delete" aria-label="Delete expense">✕</button>' +
       '</div>' +
+    '</div>';
+  }
+
+  function detailHTML(e){
+    if(e._sample || !state.open[e.id]) return "";
+    var pays = (e.payments || []).slice().sort(function(a, b){ return (a.date || "").localeCompare(b.date || ""); });
+    var inner = pays.length ? pays.map(function(p){
+      return '<div class="pd-row">' +
+        '<span class="pd-date">' + (p.date ? esc(fmtDate(p.date)) : "—") + '</span>' +
+        '<span class="method" style="margin:0">' + esc(p.method || "Other") + '</span>' +
+        (p.note ? '<span class="pd-note">' + esc(p.note) + '</span>' : '<span></span>') +
+        '<span class="pd-amt">' + money(+p.amount || 0) + '</span>' +
+      '</div>';
+    }).join("") : '<div class="pd-empty">No payments recorded yet.</div>';
+    return '<div class="row-detail">' + inner +
+      '<button type="button" class="linkbtn pd-edit" data-act="pay" data-id="' + e.id + '">Add / edit payments</button>' +
     '</div>';
   }
 
@@ -899,7 +937,7 @@
           '<span class="gd">' + money(gd) + ' due</span>' +
         '</div>' +
         '<div class="row head" aria-hidden="true"><span>Vendor / item</span><span>Total</span><span>Paid</span><span>Due</span><span>Due date</span><span></span></div>' +
-        list.map(rowHTML).join("") +
+        list.map(function(e){ return rowHTML(e) + detailHTML(e); }).join("") +
       '</div>';
     }).join("");
 
@@ -1295,6 +1333,10 @@
       }
     }else if(act === "pay"){
       openPaymentsModal(b.getAttribute("data-id"));
+    }else if(act === "toggle"){
+      var tid = b.getAttribute("data-id");
+      state.open[tid] = !state.open[tid];
+      renderMain();
     }else if(act === "delpay"){
       removePayment(b.getAttribute("data-id"), b.getAttribute("data-pay"));
       if(!modal.classList.contains("is-hidden")) openPaymentsModal(b.getAttribute("data-id"));
