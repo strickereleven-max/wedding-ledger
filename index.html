@@ -1416,16 +1416,33 @@
     render();
     applyingRemote = false;
   }
+  var pendingLocal = 0;
+  function cloudPayload(){
+    var p = {
+      events: state.data.events,
+      currentId: state.data.currentId,
+      updatedAt: Date.now()
+    };
+    // remove pre-events legacy keys so older cached clients can't read stale data
+    try{
+      var del = window.firebase.firestore.FieldValue.delete();
+      p.expenses = del; p.settings = del;
+    }catch(e){}
+    return p;
+  }
+  function flushCloud(){
+    if(!cloud) return;
+    clearTimeout(cloud.t); cloud.t = null;
+    var stamp = Date.now();
+    cloud.ref.set(cloudPayload(), { merge: true })
+      .then(function(){ if(pendingLocal && pendingLocal <= stamp) pendingLocal = 0; })
+      .catch(function(){ toast("Sync failed — your change is saved on this device."); });
+  }
   function cloudPush(){
     if(!cloud || applyingRemote) return;
+    pendingLocal = Date.now();
     clearTimeout(cloud.t);
-    cloud.t = setTimeout(function(){
-      cloud.ref.set({
-        events: state.data.events,
-        currentId: state.data.currentId,
-        updatedAt: Date.now()
-      }, { merge: true }).catch(function(){ toast("Sync failed — your change is saved on this device."); });
-    }, 700);
+    cloud.t = setTimeout(flushCloud, 700);
   }
   function startCloud(uid2, preSnap){
     cloud = { ref: window.firebase.firestore().doc("wallets/" + uid2), t: null };
@@ -1436,15 +1453,24 @@
       if(hasRemote){
         applyRemote(d);
       }else if(hasLocal || state.data.events.length > 1){
-        cloud.ref.set({ events: state.data.events, currentId: state.data.currentId, updatedAt: Date.now() }, { merge: true })
+        cloud.ref.set(cloudPayload(), { merge: true })
           .then(function(){ toast("This device's budget is now synced to your account."); })
           .catch(function(){});
       }
-      cloud.ref.onSnapshot(function(s){ if(s.exists) applyRemote(s.data()); }, function(){});
+      cloud.ref.onSnapshot(function(s){
+        if(!s.exists) return;
+        if(s.metadata && s.metadata.hasPendingWrites) return;
+        if(pendingLocal && (Date.now() - pendingLocal) < 6000) return;
+        applyRemote(s.data());
+      }, function(){});
     }
     if(preSnap){ handle(preSnap); }
     else{ cloud.ref.get().then(handle, function(){ toast("Couldn't reach sync — showing this device's data."); }); }
   }
+  document.addEventListener("visibilitychange", function(){
+    if(document.visibilityState === "hidden" && cloud && cloud.t) flushCloud();
+  });
+  window.addEventListener("pagehide", function(){ if(cloud && cloud.t) flushCloud(); });
   function showAccount(user){
     var lb = document.getElementById("lockBtn");
     var chip = document.getElementById("acctChip");
