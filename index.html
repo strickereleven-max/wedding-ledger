@@ -78,13 +78,11 @@
   .brand{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.1rem;letter-spacing:-.01em;
     display:flex;align-items:center;gap:9px}
   .brand .mark{color:var(--gold);font-size:1.15rem;transform:translateY(-1px)}
-  .tools{display:flex;align-items:center;gap:18px}
-  .tchip{font-size:.82rem;color:var(--muted);white-space:nowrap}
-  .tchip b{font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--due);font-weight:600;margin-left:5px;
-    font-variant-numeric:tabular-nums}
-  .cur{display:flex;align-items:center;gap:7px;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-  .cur select{font-size:.82rem;letter-spacing:0;text-transform:none;color:var(--ink);
-    background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+  .tools{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+  .cur{display:flex;align-items:center;gap:7px;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .cur select{font-size:.84rem;letter-spacing:0;text-transform:none;color:var(--ink);
+    background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px;max-width:190px}
+  .cur.evt select{font-weight:600}
 
   main{max-width:1080px;margin:0 auto;padding:clamp(20px,4vw,38px);
     display:flex;flex-direction:column;gap:30px}
@@ -129,7 +127,7 @@
   /* ---- add form ---- */
   .panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;
     padding:clamp(16px,3vw,24px);box-shadow:var(--shadow)}
-  .add-form{display:grid;grid-template-columns:2.2fr 1.5fr 1fr 1fr 1.2fr auto;gap:11px;align-items:end}
+  .add-form{display:grid;grid-template-columns:2fr 1.4fr .9fr .9fr 1.1fr 1.1fr auto;gap:11px;align-items:end}
   .field{display:flex;flex-direction:column;gap:6px;min-width:0}
   .field label{font-size:.66rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
   .field input,.field select{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 11px}
@@ -162,7 +160,7 @@
   .group-h .gd{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.92rem;font-weight:600;
     color:var(--due);font-variant-numeric:tabular-nums;white-space:nowrap}
 
-  .row{display:grid;grid-template-columns:minmax(150px,2.2fr) 1fr 1fr .95fr 1.15fr 70px;
+  .row{display:grid;grid-template-columns:minmax(150px,2.2fr) 1fr 1fr .95fr 1.15fr 78px;
     gap:10px;align-items:center;padding:11px 16px;border-top:1px solid var(--line)}
   .row:not(.head):hover{background:var(--surface-2)}
   .row.head{border-top:0;padding:14px 16px 9px}
@@ -185,6 +183,7 @@
   .num:focus{outline:none;border-color:var(--focus);background:var(--ground)}
   .ro{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.98rem;color:var(--ink);padding:8px;
     display:inline-block;font-variant-numeric:tabular-nums}
+  .pcount{display:block;font-size:.64rem;color:var(--muted);padding:0 8px;margin-top:1px}
   .dt{font-size:.92rem;color:var(--ink);width:100%;border:1px solid transparent;background:transparent;
     border-radius:8px;padding:7px 6px}
   .dt:hover{border-color:var(--line)}
@@ -198,12 +197,29 @@
     font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);
     background:var(--accent-soft);padding:2px 8px;border-radius:999px}
   .icon-btn{border:1px solid var(--line);background:var(--surface);color:var(--muted);
-    width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:.78rem;line-height:1;
+    width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:.85rem;line-height:1;
     display:inline-grid;place-items:center}
   .icon-btn:hover{color:var(--ink);border-color:var(--muted)}
   .icon-btn.del:hover{color:var(--due);border-color:var(--due)}
   .icon-btn.armed{width:auto;padding:0 10px;background:var(--due);border-color:var(--due);
     color:var(--on-accent);font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+
+  /* ---- payments view ---- */
+  .method{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--muted);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;
+    padding:2px 7px;vertical-align:middle;margin-left:4px}
+  .pmt-top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;
+    margin-bottom:14px;box-shadow:var(--shadow)}
+  .pmt-top .k{display:block;font-size:.66rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .pmt-total{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.6rem;color:var(--accent-ink)}
+  .pmt-break{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+  .pmt-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;
+    padding:10px 16px;border-top:1px solid var(--line)}
+  .pmt-date{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.85rem;color:var(--muted);white-space:nowrap}
+  .pmt-vend{font-weight:500;min-width:0}
+  .pmt-note{font-size:.78rem;color:var(--muted)}
+  .pmt-amt{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
 
   .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,12px);opacity:0;
     background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:10px;font-size:.85rem;
@@ -253,9 +269,9 @@
     text-decoration:underline;cursor:pointer}
   .linkbtn:hover{color:var(--ink)}
 
-  /* ---- backup modal ---- */
+  /* ---- modal ---- */
   .modal{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.45)}
-  .modal-card{width:100%;max-width:460px;background:var(--surface);border:1px solid var(--line);
+  .modal-card{width:100%;max-width:520px;background:var(--surface);border:1px solid var(--line);
     border-radius:16px;box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;gap:12px}
   .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
   .modal-head h2{margin:0;font-family:"Fraunces",Georgia,serif;font-weight:500;font-size:1.15rem}
@@ -268,12 +284,30 @@
   .modal-btn{height:38px;padding:0 16px}
   .modal-btn.danger,.modal-btn.armed{background:var(--due)}
   .modal-file{font-size:.8rem;color:var(--muted);max-width:100%}
+  #modalBody{display:flex;flex-direction:column;gap:12px;max-height:56vh;overflow:auto}
+  .pay-list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .pay-row{display:grid;grid-template-columns:1.15fr 1fr .85fr auto;gap:8px;align-items:center;padding:8px 10px;border-top:1px solid var(--line)}
+  .pay-row:first-child{border-top:0}
+  .pay-add{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .pay-add input,.pay-add select,.pay-row input,.pay-row select,.pm-sel{
+    background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:8px 9px;font:inherit;color:var(--ink);min-width:0}
+  .pay-add input:focus,.pay-add select:focus,.pay-row input:focus,.pay-row select:focus{
+    outline:none;border-color:var(--focus);box-shadow:0 0 0 3px var(--accent-soft)}
+  .evt-list{display:flex;flex-direction:column;gap:8px}
+  .evt-item{display:flex;align-items:center;gap:10px}
+  .evt-name{flex:1;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:8px 10px;font:inherit;color:var(--ink);min-width:0}
+  .evt-name:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px var(--accent-soft)}
+  .evt-cur{font-size:.64rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--accent-ink);
+    background:var(--accent-soft);border-radius:999px;padding:3px 9px;white-space:nowrap}
 
-  @media (max-width:820px){ .tiles{grid-template-columns:repeat(2,1fr)} }
-  @media (max-width:560px){
-    .topbar{flex-wrap:wrap}
-    .tools{width:100%;justify-content:space-between;gap:10px}
+  @media (max-width:860px){ .tiles{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:620px){
     .tiles{grid-template-columns:1fr}
+    .add-form{grid-template-columns:1fr 1fr}
+    .add-form .field:first-child,.add-form .btn{grid-column:1 / -1}
+    .pay-add{grid-template-columns:1fr}
+    .pay-row{grid-template-columns:1fr 1fr;gap:8px 8px}
+    .pay-row .icon-btn{grid-column:2;justify-self:end}
   }
   @media (max-width:720px){
     .row{grid-template-columns:1fr 1fr;gap:11px 12px;padding:13px 14px}
@@ -285,8 +319,8 @@
     .cell.vend::before,.cell.act::before{display:none}
     .num,.dt{text-align:left;border-color:var(--line)}
     .due-val{text-align:left;padding-right:0}
-    .add-form{grid-template-columns:1fr 1fr}
-    .add-form .field:first-child,.add-form .btn{grid-column:1 / -1}
+    .pmt-row{grid-template-columns:auto 1fr auto}
+    .pmt-row .icon-btn{grid-column:1 / -1;justify-self:start}
   }
   @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
 </style>
@@ -313,7 +347,10 @@
 <header class="topbar">
   <div class="brand"><span class="mark">&#10022;</span> Wedding Ledger</div>
   <div class="tools">
-    <span class="tchip">Outstanding <b id="tickerDue">&mdash;</b></span>
+    <label class="cur evt"><span>Event</span>
+      <select id="eventSel" aria-label="Event dashboard"></select>
+    </label>
+    <button type="button" id="evtManage" class="lockbtn" title="Manage event dashboards">Manage</button>
     <label class="cur"><span>Currency</span>
       <select id="currency" aria-label="Currency">
         <option value="$">$ USD</option>
@@ -355,6 +392,10 @@
         <input id="f-paid" name="paid" type="number" min="0" step="1" placeholder="0">
       </div>
       <div class="field">
+        <label for="f-method">Method</label>
+        <select id="f-method" name="method"></select>
+      </div>
+      <div class="field">
         <label for="f-date">Balance due</label>
         <input id="f-date" name="dueDate" type="date">
       </div>
@@ -362,8 +403,8 @@
     </form>
   </section>
 
-  <section aria-label="Expense ledger">
-    <h2 class="sec-h">The ledger</h2>
+  <section aria-label="Ledger">
+    <h2 class="sec-h" id="mainHead">The ledger</h2>
     <div id="controls" class="controls"></div>
     <div id="ledger"></div>
   </section>
@@ -384,7 +425,8 @@
       <button type="button" class="icon-btn" id="modalClose" aria-label="Close">&#10005;</button>
     </div>
     <p class="modal-sub" id="modalSub"></p>
-    <textarea id="modalText" class="modal-text" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+    <div id="modalBody" class="is-hidden"></div>
+    <textarea id="modalText" class="modal-text is-hidden" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
     <div class="modal-actions" id="modalActions"></div>
   </div>
 </div>
@@ -396,134 +438,307 @@
   var CATEGORIES = ["Venue","Catering","Photography & Video","Attire & Beauty","Florals & Decor",
     "Music & Entertainment","Cake & Desserts","Stationery","Rings","Transport","Rentals",
     "Guest Favors","Officiant","Other"];
+  var METHODS = ["Cash","Bank transfer","UPI","Cheque","Card","Other"];
 
   var SAMPLES = [
-    {vendor:"Rosewood Barn",           category:"Venue",                total:9000, paid:3000, dueDate:"2026-05-15"},
-    {vendor:"Fig & Thyme Catering",    category:"Catering",             total:6800, paid:1500, dueDate:"2026-06-01"},
-    {vendor:"A. Rivera Photography",   category:"Photography & Video",  total:3800, paid:1200, dueDate:"2026-06-10"},
-    {vendor:"Wildflower Studio",       category:"Florals & Decor",      total:2400, paid:600,  dueDate:""},
-    {vendor:"The Night Owls",          category:"Music & Entertainment",total:2200, paid:0,    dueDate:"2026-06-12"},
-    {vendor:"Sugarcraft Bakehouse",    category:"Cake & Desserts",      total:650,  paid:650,  dueDate:""}
+    {vendor:"Rosewood Barn",        category:"Venue",                total:9000, dueDate:"2026-05-15", payments:[{amount:3000,date:"2026-01-12",method:"Bank transfer"}]},
+    {vendor:"Fig & Thyme Catering", category:"Catering",             total:6800, dueDate:"2026-06-01", payments:[{amount:1500,date:"2026-02-04",method:"UPI"}]},
+    {vendor:"A. Rivera Photography",category:"Photography & Video",  total:3800, dueDate:"2026-06-10", payments:[{amount:1200,date:"2026-02-21",method:"Card"}]},
+    {vendor:"Wildflower Studio",    category:"Florals & Decor",      total:2400, dueDate:"",           payments:[{amount:600,date:"2026-03-02",method:"Cash"}]},
+    {vendor:"The Night Owls",       category:"Music & Entertainment",total:2200, dueDate:"2026-06-12", payments:[]},
+    {vendor:"Sugarcraft Bakehouse",category:"Cake & Desserts",      total:650,  dueDate:"",           payments:[{amount:650,date:"2026-03-16",method:"Cash"}]}
   ];
 
   var state = {
-    expenses: [],
-    settings: { currency:"$", budgetTarget:0, weddingDate:"" },
-    filter: { category:"all", status:"all" }
+    data: { events: [], currentId: "" },
+    filter: { category: "all", status: "all" },
+    view: "ledger"
   };
   var db = null, mode = "local";
+  var cloud = null, applyingRemote = false, fbUser = null, fbAuth = null;
 
   var summaryEl = document.getElementById("summary");
   var controlsEl = document.getElementById("controls");
   var ledgerEl = document.getElementById("ledger");
+  var mainHeadEl = document.getElementById("mainHead");
   var currencySel = document.getElementById("currency");
-  var tickerDue = document.getElementById("tickerDue");
+  var eventSel = document.getElementById("eventSel");
   var saveNote = document.getElementById("saveNote");
-  var form = document.getElementById("addForm");
+  var addForm = document.getElementById("addForm");
 
   /* ---------- helpers ---------- */
   function esc(s){
-    return String(s==null?"":s).replace(/[&<>"']/g,function(c){
-      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
     });
   }
+  function uid(p){ return (p || "") + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+  }
+  function curEvent(){
+    var d = state.data;
+    return d.events.filter(function(e){ return e.id === d.currentId; })[0] || d.events[0] || null;
+  }
+  function curCurrency(){ var e = curEvent(); return (e && e.currency) || "$"; }
   function money(n){
     n = +n || 0;
-    var c = state.settings.currency || "$";
+    var c = curCurrency();
     var neg = n < 0; n = Math.abs(n);
     var dec = n % 1 ? 2 : 0;
-    return (neg ? "−" : "") + c + n.toLocaleString("en-US",{minimumFractionDigits:dec,maximumFractionDigits:2});
+    return (neg ? "−" : "") + c + n.toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: 2 });
   }
-  function startOfToday(){ var d = new Date(); d.setHours(0,0,0,0); return d; }
+  function startOfToday(){ var d = new Date(); d.setHours(0, 0, 0, 0); return d; }
   function fmtDate(s){
     if(!s) return "";
     var d = new Date(s + "T00:00");
     if(isNaN(d)) return "";
-    return d.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+  function fmtMonth(ym){
+    var d = new Date(ym + "-01T00:00");
+    if(isNaN(d)) return ym;
+    return d.toLocaleDateString(undefined, { month: "long", year: "numeric" });
   }
   function daysToGo(s){
     var d = new Date(s + "T00:00");
     return Math.ceil((d - startOfToday()) / 86400000);
   }
-  function due(e){ return Math.max((+e.total||0) - (+e.paid||0), 0); }
+  function paidOf(e){
+    if(e.payments && e.payments.length){
+      return e.payments.reduce(function(a, p){ return a + (+p.amount || 0); }, 0);
+    }
+    return +e.paid || 0;
+  }
+  function dueOf(e){ return Math.max((+e.total || 0) - paidOf(e), 0); }
+  function findExpense(id){
+    var ev = curEvent();
+    if(!ev) return null;
+    return ev.expenses.filter(function(e){ return e.id === id; })[0] || null;
+  }
   function toast(msg){
     var t = document.createElement("div");
-    t.className = "toast"; t.setAttribute("role","status"); t.textContent = msg;
+    t.className = "toast"; t.setAttribute("role", "status"); t.textContent = msg;
     document.body.appendChild(t);
     requestAnimationFrame(function(){ t.classList.add("show"); });
     setTimeout(function(){ t.classList.remove("show"); setTimeout(function(){ t.remove(); }, 320); }, 2600);
   }
   function effectiveRows(){
-    if(state.expenses.length) return state.expenses;
-    return SAMPLES.map(function(s){ var o = {}; for(var k in s) o[k]=s[k]; o._sample = true; return o; });
+    var ev = curEvent();
+    if(ev && ev.expenses.length) return ev.expenses;
+    return SAMPLES.map(function(s){
+      return {
+        _sample: true, id: "s" + Math.random().toString(36).slice(2, 8),
+        vendor: s.vendor, category: s.category, total: s.total, dueDate: s.dueDate,
+        payments: (s.payments || []).map(function(p){ return { amount: p.amount, date: p.date, method: p.method }; })
+      };
+    });
+  }
+
+  /* ---------- normalise / migrate ---------- */
+  function normPayment(p){
+    p = p || {};
+    return {
+      id: p.id || uid("pay-"),
+      amount: Math.max(0, +p.amount || 0),
+      date: p.date || "",
+      method: p.method || "Other",
+      note: p.note || ""
+    };
+  }
+  function normExpense(x){
+    x = x || {};
+    var payments = Array.isArray(x.payments) ? x.payments.map(normPayment) : [];
+    if(!payments.length && +x.paid > 0){
+      payments = [ normPayment({ amount: +x.paid, date: x.paidDate || "", method: x.method || "Other", note: "Earlier payments" }) ];
+    }
+    return {
+      id: x.id || uid("exp-"),
+      vendor: x.vendor || "",
+      category: x.category || "Other",
+      total: Math.max(0, +x.total || 0),
+      dueDate: x.dueDate || "",
+      createdAt: +x.createdAt || Date.now(),
+      payments: payments
+    };
+  }
+  function normEvent(e){
+    e = e || {};
+    return {
+      id: e.id || uid("evt-"),
+      name: (e.name || "Event").toString().slice(0, 60),
+      currency: e.currency || "$",
+      budgetTarget: Math.max(0, +e.budgetTarget || 0),
+      weddingDate: e.weddingDate || "",
+      expenses: (Array.isArray(e.expenses) ? e.expenses : []).map(normExpense)
+    };
+  }
+  function migrateBlob(d){
+    d = d || {};
+    if(Array.isArray(d.events) && d.events.length){
+      var evs = d.events.map(normEvent);
+      var cur = evs.filter(function(e){ return e.id === d.currentId; })[0];
+      return { events: evs, currentId: cur ? cur.id : evs[0].id };
+    }
+    if(Array.isArray(d.expenses) && d.expenses.length){
+      var s = d.settings || {};
+      var ev = normEvent({
+        id: "evt-main",
+        name: s.eventName || "Wedding",
+        currency: s.currency || "$",
+        budgetTarget: s.budgetTarget || 0,
+        weddingDate: s.weddingDate || "",
+        expenses: d.expenses
+      });
+      return { events: [ev], currentId: ev.id };
+    }
+    return { events: [], currentId: "" };
+  }
+  function ensureEvent(){
+    var d = state.data;
+    if(!d.events.length){
+      var e = normEvent({ name: "Wedding" });
+      d.events.push(e); d.currentId = e.id;
+    }
+    if(!d.events.some(function(e){ return e.id === d.currentId; })){
+      d.currentId = d.events[0].id;
+    }
   }
 
   /* ---------- persistence ---------- */
-  function loadLocal(){
-    try{ var e = JSON.parse(localStorage.getItem("wedledger.expenses")||"[]"); if(Array.isArray(e)) state.expenses = e; }catch(x){}
-    try{ var s = JSON.parse(localStorage.getItem("wedledger.settings")||"{}"); for(var k in s) state.settings[k] = s[k]; }catch(x){}
-  }
   function saveLocal(){
-    try{
-      localStorage.setItem("wedledger.expenses", JSON.stringify(state.expenses));
-      localStorage.setItem("wedledger.settings", JSON.stringify(state.settings));
-    }catch(x){}
+    try{ localStorage.setItem("wedledger.v2", JSON.stringify(state.data)); }catch(e){}
   }
-  function persistLocal(){ saveLocal(); if(typeof cloudPush === "function") cloudPush(); }
-  function addExpenseObj(o){
-    if(mode === "db"){
-      db.collection("expenses").add(o).catch(function(){ toast("Could not save that expense — try again."); });
-    }else{
-      o.id = "e" + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
-      state.expenses.push(o); persistLocal(); render();
+  function loadLocal(){
+    var raw = null;
+    try{ raw = localStorage.getItem("wedledger.v2"); }catch(e){}
+    if(raw){
+      try{ state.data = migrateBlob(JSON.parse(raw)); ensureEvent(); return; }catch(e){}
     }
+    var legacy = { expenses: [], settings: {} };
+    try{ legacy.expenses = JSON.parse(localStorage.getItem("wedledger.expenses") || "[]"); }catch(e){}
+    try{ legacy.settings = JSON.parse(localStorage.getItem("wedledger.settings") || "{}"); }catch(e){}
+    if(Array.isArray(legacy.expenses) && legacy.expenses.length){
+      state.data = migrateBlob(legacy);
+    }
+    ensureEvent();
+  }
+  function dbPush(){
+    if(!(mode === "db" && db) || applyingRemote) return;
+    db.doc("app/v2").set({ events: state.data.events, currentId: state.data.currentId }).catch(function(){});
+  }
+  function commit(){
+    ensureEvent();
+    saveLocal();
+    if(typeof cloudPush === "function") cloudPush();
+    dbPush();
+    render();
+  }
+
+  /* ---------- mutations ---------- */
+  function addExpenseObj(o){
+    var ev = curEvent();
+    if(!ev) return;
+    o.id = uid("exp-");
+    o.createdAt = Date.now();
+    o.payments = Array.isArray(o.payments) ? o.payments.map(normPayment) : [];
+    ev.expenses.push(o);
+    commit();
   }
   function patchExpense(id, patch){
-    if(mode === "db"){
-      db.doc("expenses/" + id).update(patch).catch(function(){ toast("Could not save that change."); });
-    }else{
-      var x = state.expenses.find(function(e){ return e.id === id; });
-      if(x){ for(var k in patch) x[k] = patch[k]; persistLocal(); render(); }
-    }
+    var x = findExpense(id);
+    if(!x) return;
+    for(var k in patch) x[k] = patch[k];
+    commit();
   }
   function removeExpense(id){
-    if(mode === "db"){
-      db.doc("expenses/" + id).delete().catch(function(){ toast("Could not delete that expense."); });
-    }else{
-      state.expenses = state.expenses.filter(function(e){ return e.id !== id; });
-      persistLocal(); render();
-    }
+    var ev = curEvent();
+    if(!ev) return;
+    ev.expenses = ev.expenses.filter(function(e){ return e.id !== id; });
+    commit();
   }
-  function saveSettings(patch){
-    for(var k in patch) state.settings[k] = patch[k];
-    render();
-    if(mode === "db"){ db.doc("app/settings").set(state.settings).catch(function(){}); }
-    else persistLocal();
+  function patchEvent(patch){
+    var ev = curEvent();
+    if(!ev) return;
+    for(var k in patch) ev[k] = patch[k];
+    commit();
+  }
+  function addEvent(name){
+    var base = curEvent();
+    var e = normEvent({ name: name, currency: base ? base.currency : "$" });
+    state.data.events.push(e);
+    state.data.currentId = e.id;
+    state.filter = { category: "all", status: "all" };
+    state.view = "ledger";
+    commit();
+  }
+  function deleteEvent(id){
+    state.data.events = state.data.events.filter(function(e){ return e.id !== id; });
+    if(state.data.currentId === id){
+      state.data.currentId = state.data.events[0] ? state.data.events[0].id : "";
+    }
+    ensureEvent();
+    commit();
+  }
+  function switchEvent(id){
+    state.data.currentId = id;
+    state.filter = { category: "all", status: "all" };
+    state.view = "ledger";
+    commit();
+  }
+  function addPayment(expId, p){
+    var x = findExpense(expId);
+    if(!x) return;
+    x.payments = x.payments || [];
+    x.payments.push(normPayment(p));
+    commit();
+  }
+  function patchPayment(expId, payId, patch){
+    var x = findExpense(expId);
+    if(!x || !x.payments) return;
+    var p = x.payments.filter(function(z){ return z.id === payId; })[0];
+    if(!p) return;
+    for(var k in patch) p[k] = patch[k];
+    commit();
+  }
+  function removePayment(expId, payId){
+    var x = findExpense(expId);
+    if(!x || !x.payments) return;
+    x.payments = x.payments.filter(function(z){ return z.id !== payId; });
+    commit();
   }
 
   /* ---------- render ---------- */
   function render(){
-    currencySel.value = state.settings.currency || "$";
+    ensureEvent();
+    var ev = curEvent();
+    currencySel.value = curCurrency();
+    eventSel.innerHTML = state.data.events.map(function(e){
+      return '<option value="' + esc(e.id) + '"' + (e.id === state.data.currentId ? " selected" : "") + ">" + esc(e.name) + "</option>";
+    }).join("");
+    mainHeadEl.textContent = state.view === "payments" ? "Payment history" : "The ledger";
     renderSummary();
     renderControls();
-    renderLedger();
+    renderMain();
     saveNote.textContent = (mode === "db" || cloud) ? "Synced across your devices." : "Saved on this device.";
   }
 
   function renderSummary(){
+    var ev = curEvent() || {};
     var rows = effectiveRows();
     var committed = 0, paid = 0, bal = 0;
-    rows.forEach(function(e){ committed += (+e.total||0); paid += (+e.paid||0); bal += due(e); });
-    var budget = +state.settings.budgetTarget || 0;
+    rows.forEach(function(e){ committed += (+e.total || 0); paid += paidOf(e); bal += dueOf(e); });
+    var budget = +ev.budgetTarget || 0;
     var pct = committed > 0 ? Math.round(paid / committed * 100) : 0;
 
-    var wd = state.settings.weddingDate || "";
+    var wd = ev.weddingDate || "";
     var dtg = "";
     if(wd){
       var n = daysToGo(wd);
-      dtg = n > 0 ? (n + " day" + (n===1?"":"s") + " to go")
+      dtg = n > 0 ? (n + " day" + (n === 1 ? "" : "s") + " to go")
           : n === 0 ? "The big day is here 🎉"
-          : (Math.abs(n) + " day" + (Math.abs(n)===1?"":"s") + " ago");
+          : (Math.abs(n) + " day" + (Math.abs(n) === 1 ? "" : "s") + " ago");
     }
 
     var budgetSub;
@@ -539,8 +754,8 @@
     summaryEl.innerHTML =
       '<div class="wed-row">' +
         '<div class="wed">' +
-          '<span class="k">Wedding day</span>' +
-          '<input type="date" id="weddingDate" value="' + esc(wd) + '" aria-label="Wedding date">' +
+          '<span class="k">Event date</span>' +
+          '<input type="date" id="weddingDate" value="' + esc(wd) + '" aria-label="Event date">' +
           (dtg ? '<span class="dtg">' + esc(dtg) + '</span>' : '') +
         '</div>' +
       '</div>' +
@@ -568,14 +783,22 @@
       '</div>' +
       '<div class="meter-wrap">' +
         '<div class="meter-label"><span>Payment progress</span><span>' + pct + '%</span></div>' +
-        '<div class="meter"><div class="meter-fill" style="width:' + Math.min(pct,100) + '%"></div></div>' +
+        '<div class="meter"><div class="meter-fill" style="width:' + Math.min(pct, 100) + '%"></div></div>' +
         '<div class="meter-sub">' + money(paid) + ' paid of ' + money(committed) + ' · ' + money(bal) + ' to go</div>' +
       '</div>';
-
-    tickerDue.textContent = money(bal);
   }
 
   function renderControls(){
+    var viewChips = [["ledger", "Ledger"], ["payments", "Payments"]].map(function(p){
+      return '<button class="chip" data-act="fview" data-v="' + p[0] + '" aria-pressed="' +
+        (state.view === p[0]) + '">' + p[1] + '</button>';
+    }).join("");
+
+    if(state.view !== "ledger"){
+      controlsEl.innerHTML = '<div class="chips">' + viewChips + '</div>';
+      return;
+    }
+
     var rows = effectiveRows();
     var present = [];
     rows.forEach(function(e){ var c = e.category || "Other"; if(present.indexOf(c) < 0) present.push(c); });
@@ -587,32 +810,42 @@
         (state.filter.category === c) + '">' + (c === "all" ? "All categories" : esc(c)) + '</button>';
     }).join("");
 
-    var statusChips = [["all","All"],["outstanding","Outstanding"],["settled","Settled"]].map(function(p){
+    var statusChips = [["all", "All"], ["outstanding", "Outstanding"], ["settled", "Settled"]].map(function(p){
       return '<button class="chip" data-act="fstatus" data-v="' + p[0] + '" aria-pressed="' +
         (state.filter.status === p[0]) + '">' + p[1] + '</button>';
     }).join("");
 
-    controlsEl.innerHTML = '<div class="chips">' + catChips + '</div><div class="chips">' + statusChips + '</div>';
+    controlsEl.innerHTML =
+      '<div class="chips">' + viewChips + '</div>' +
+      '<div class="chips">' + catChips + '</div>' +
+      '<div class="chips">' + statusChips + '</div>';
+  }
+
+  function renderMain(){
+    if(state.view === "payments") renderPayments();
+    else renderLedger();
   }
 
   function passFilter(e){
     if(state.filter.category !== "all" && (e.category || "Other") !== state.filter.category) return false;
-    var d = due(e);
+    var d = dueOf(e);
     if(state.filter.status === "outstanding" && d <= 0) return false;
-    if(state.filter.status === "settled" && !(d <= 0 && (+e.total||0) > 0)) return false;
+    if(state.filter.status === "settled" && !(d <= 0 && (+e.total || 0) > 0)) return false;
     return true;
   }
 
   function rowHTML(e){
-    var total = +e.total || 0, pd = +e.paid || 0, d = Math.max(total - pd, 0);
+    var total = +e.total || 0, pd = paidOf(e), d = Math.max(total - pd, 0);
     var settled = d <= 0 && total > 0;
+    var np = (e.payments || []).length;
+    var pcount = np ? (np + (np === 1 ? " payment" : " payments")) : "no payments";
     var overdue = e.dueDate && d > 0 && new Date(e.dueDate + "T00:00") < startOfToday();
 
     if(e._sample){
       return '<div class="row' + (settled ? " settled" : "") + '">' +
         '<div class="cell vend"><span class="vend-ro">' + esc(e.vendor) + '</span></div>' +
         '<div class="cell" data-label="Total"><span class="ro">' + money(total) + '</span></div>' +
-        '<div class="cell" data-label="Paid"><span class="ro">' + money(pd) + '</span></div>' +
+        '<div class="cell" data-label="Paid"><span class="ro">' + money(pd) + '</span><span class="pcount">' + pcount + '</span></div>' +
         '<div class="cell due-val ' + (d > 0 ? "pos" : "zero") + '" data-label="Due">' + money(d) + '</div>' +
         '<div class="cell" data-label="Due date"><span class="ro">' + (fmtDate(e.dueDate) || "—") + '</span></div>' +
         '<div class="cell act"></div>' +
@@ -625,11 +858,11 @@
         (overdue ? '<span class="overdue">Overdue · was ' + esc(fmtDate(e.dueDate)) + '</span>' : '') +
       '</div>' +
       '<div class="cell" data-label="Total"><input class="num" type="number" min="0" step="1" data-id="' + e.id + '" data-field="total" value="' + total + '" aria-label="Total cost"></div>' +
-      '<div class="cell" data-label="Paid"><input class="num" type="number" min="0" step="1" data-id="' + e.id + '" data-field="paid" value="' + pd + '" aria-label="Amount paid"></div>' +
+      '<div class="cell" data-label="Paid"><span class="ro">' + money(pd) + '</span><span class="pcount">' + pcount + '</span></div>' +
       '<div class="cell due-val ' + (d > 0 ? "pos" : "zero") + '" data-label="Due">' + money(d) + '</div>' +
       '<div class="cell" data-label="Due date"><input class="dt" type="date" data-id="' + e.id + '" data-field="dueDate" value="' + esc(e.dueDate || "") + '" aria-label="Balance due date"></div>' +
       '<div class="cell act">' +
-        (d > 0 ? '<button class="icon-btn" data-act="full" data-id="' + e.id + '" title="Mark paid in full" aria-label="Mark paid in full">✓</button>' : '') +
+        '<button class="icon-btn" data-act="pay" data-id="' + e.id + '" title="Payments" aria-label="Payments">＋</button>' +
         '<button class="icon-btn del" data-act="del" data-id="' + e.id + '" title="Delete" aria-label="Delete expense">✕</button>' +
       '</div>' +
     '</div>';
@@ -658,7 +891,7 @@
 
     html += order.map(function(cat){
       var list = groups[cat];
-      var gd = list.reduce(function(a,e){ return a + due(e); }, 0);
+      var gd = list.reduce(function(a, e){ return a + dueOf(e); }, 0);
       return '<div class="group">' +
         '<div class="group-h">' +
           '<h3>' + esc(cat) + '</h3>' +
@@ -673,84 +906,73 @@
     ledgerEl.innerHTML = html;
   }
 
-  /* ---------- events ---------- */
-  CATEGORIES.forEach(function(c){
-    var o = document.createElement("option");
-    o.value = c; o.textContent = c;
-    document.getElementById("f-cat").appendChild(o);
-  });
-
-  form.addEventListener("submit", function(ev){
-    ev.preventDefault();
-    var fd = new FormData(form);
-    var vendor = (fd.get("vendor") || "").trim();
-    if(!vendor) return;
-    addExpenseObj({
-      vendor: vendor,
-      category: fd.get("category") || "Other",
-      total: Math.max(0, +fd.get("total") || 0),
-      paid: Math.max(0, +fd.get("paid") || 0),
-      dueDate: fd.get("dueDate") || "",
-      createdAt: Date.now()
+  function renderPayments(){
+    var rows = effectiveRows();
+    var isSample = rows.length && rows[0]._sample;
+    var pays = [];
+    rows.forEach(function(e){
+      (e.payments || []).forEach(function(p){
+        pays.push({
+          amount: +p.amount || 0, date: p.date || "", method: p.method || "Other", note: p.note || "",
+          vendor: e.vendor, expId: e.id, payId: p.id, _sample: e._sample
+        });
+      });
     });
-    form.reset();
-    document.getElementById("f-vendor").focus();
-  });
 
-  ledgerEl.addEventListener("change", function(ev){
-    var t = ev.target;
-    var id = t.getAttribute("data-id"), f = t.getAttribute("data-field");
-    if(!id || !f) return;
-    var val = t.value;
-    if(f === "total" || f === "paid") val = Math.max(0, +val || 0);
-    if(f === "vendor"){ val = val.trim(); if(!val){ render(); return; } }
-    var patch = {}; patch[f] = val;
-    patchExpense(id, patch);
-  });
-
-  summaryEl.addEventListener("change", function(ev){
-    var t = ev.target;
-    if(t.id === "budget") saveSettings({ budgetTarget: Math.max(0, +t.value || 0) });
-    if(t.id === "weddingDate") saveSettings({ weddingDate: t.value });
-  });
-
-  currencySel.addEventListener("change", function(){ saveSettings({ currency: currencySel.value }); });
-
-  document.addEventListener("click", function(ev){
-    var b = ev.target.closest("[data-act]");
-    if(!b) return;
-    var act = b.getAttribute("data-act");
-    if(act === "del"){
-      if(b.getAttribute("data-armed") === "1"){
-        removeExpense(b.getAttribute("data-id"));
-      }else{
-        b.setAttribute("data-armed","1");
-        b.classList.add("armed");
-        b.textContent = "Delete?";
-        b.setAttribute("title","Click again to remove");
-        clearTimeout(b._revert);
-        b._revert = setTimeout(function(){
-          b.removeAttribute("data-armed");
-          b.classList.remove("armed");
-          b.textContent = "✕";
-          b.setAttribute("title","Delete");
-        }, 3500);
-      }
-    }else if(act === "full"){
-      var id = b.getAttribute("data-id");
-      var x = state.expenses.find(function(e){ return e.id === id; });
-      if(x) patchExpense(id, { paid: +x.total || 0 });
-    }else if(act === "fcat"){
-      state.filter.category = b.getAttribute("data-v"); renderControls(); renderLedger();
-    }else if(act === "fstatus"){
-      state.filter.status = b.getAttribute("data-v"); renderControls(); renderLedger();
+    if(!pays.length){
+      ledgerEl.innerHTML = '<p class="empty">No payments recorded yet. Open a ledger row (＋) to add one.</p>';
+      return;
     }
-  });
 
-  /* ---------- backup: export / import ---------- */
+    pays.sort(function(a, b){ return (b.date || "").localeCompare(a.date || ""); });
+    var total = pays.reduce(function(a, p){ return a + p.amount; }, 0);
+    var byM = {};
+    pays.forEach(function(p){ byM[p.method] = (byM[p.method] || 0) + p.amount; });
+    var breakdown = Object.keys(byM).map(function(m){
+      return '<span><span class="method" style="margin:0">' + esc(m) + '</span> ' + money(byM[m]) + '</span>';
+    }).join("");
+
+    var groups = {};
+    pays.forEach(function(p){
+      var key = /^\d{4}-\d{2}/.test(p.date) ? p.date.slice(0, 7) : "0000-00";
+      (groups[key] = groups[key] || []).push(p);
+    });
+    var keys = Object.keys(groups).sort().reverse();
+
+    var html = (isSample ? '<p class="sample-note">Sample payments. Add your own from a ledger row.</p>' : '') +
+      '<div class="pmt-top">' +
+        '<div><span class="k">Total paid</span><span class="pmt-total">' + money(total) + '</span></div>' +
+        '<div class="pmt-break">' + breakdown + '</div>' +
+      '</div>';
+
+    html += keys.map(function(k){
+      var list = groups[k];
+      var sub = list.reduce(function(a, p){ return a + p.amount; }, 0);
+      var label = k === "0000-00" ? "No date" : fmtMonth(k);
+      return '<div class="group">' +
+        '<div class="group-h"><h3>' + esc(label) + '</h3>' +
+          '<span class="gd" style="color:var(--accent-ink)">' + money(sub) + '</span></div>' +
+        list.map(function(p){
+          return '<div class="pmt-row">' +
+            '<span class="pmt-date">' + (p.date ? esc(fmtDate(p.date)) : "—") + '</span>' +
+            '<span class="pmt-vend">' + esc(p.vendor || "—") + '<span class="method">' + esc(p.method) + '</span>' +
+              (p.note ? ' <span class="pmt-note">' + esc(p.note) + '</span>' : '') + '</span>' +
+            '<span class="pmt-amt">' + money(p.amount) + '</span>' +
+            (p._sample ? '<span></span>'
+              : '<button class="icon-btn del" data-act="delpay" data-id="' + p.expId + '" data-pay="' + p.payId + '" title="Delete payment" aria-label="Delete payment">✕</button>') +
+          '</div>';
+        }).join("") +
+      '</div>';
+    }).join("");
+
+    ledgerEl.innerHTML = html;
+  }
+
+  /* ---------- modal ---------- */
   var modal = document.getElementById("modal");
   var modalTitle = document.getElementById("modalTitle");
   var modalSub = document.getElementById("modalSub");
+  var modalBody = document.getElementById("modalBody");
   var modalText = document.getElementById("modalText");
   var modalActions = document.getElementById("modalActions");
 
@@ -774,41 +996,153 @@
     modalTitle.textContent = title;
     modalSub.textContent = sub || "";
     modalActions.innerHTML = "";
+    modalBody.innerHTML = ""; modalBody.classList.add("is-hidden"); modalBody.__redraw = null;
+    modalText.classList.add("is-hidden"); modalText.value = ""; modalText.readOnly = false;
     modal.classList.remove("is-hidden");
   }
   function closeModal(){
     modal.classList.add("is-hidden");
-    modalActions.innerHTML = ""; modalText.value = ""; modalText.readOnly = false;
+    modalActions.innerHTML = ""; modalBody.innerHTML = ""; modalBody.__redraw = null;
+    modalText.value = ""; modalText.readOnly = false;
   }
+  function useText(){ modalText.classList.remove("is-hidden"); }
+  function useBody(){ modalBody.classList.remove("is-hidden"); }
+
   document.getElementById("modalClose").addEventListener("click", closeModal);
   modal.addEventListener("click", function(e){ if(e.target === modal) closeModal(); });
   document.addEventListener("keydown", function(e){
     if(e.key === "Escape" && !modal.classList.contains("is-hidden")) closeModal();
   });
+  modalBody.addEventListener("change", function(ev){
+    var t = ev.target;
+    var payRow = t.closest(".pay-row");
+    if(payRow){
+      var list = payRow.closest(".pay-list");
+      var expId = list && list.getAttribute("data-exp");
+      var payId = payRow.getAttribute("data-pay");
+      var pf = t.getAttribute("data-pf");
+      if(expId && payId && pf){
+        var v = t.value;
+        if(pf === "amount") v = Math.max(0, +v || 0);
+        var patch = {}; patch[pf] = v;
+        patchPayment(expId, payId, patch);
+        openPaymentsModal(expId);
+      }
+      return;
+    }
+    var evtItem = t.closest(".evt-item");
+    if(evtItem && t.getAttribute("data-ef") === "name"){
+      var id = evtItem.getAttribute("data-id");
+      var e = state.data.events.filter(function(x){ return x.id === id; })[0];
+      if(e){ e.name = (t.value || "Event").slice(0, 60); commit(); }
+    }
+  });
 
-  function backupData(){
-    return {
-      app: "wedding-ledger", version: 1, exportedAt: new Date().toISOString(),
-      settings: {
-        currency: state.settings.currency || "$",
-        budgetTarget: +state.settings.budgetTarget || 0,
-        weddingDate: state.settings.weddingDate || ""
-      },
-      expenses: state.expenses.map(function(e){
-        return {
-          vendor: e.vendor || "", category: e.category || "Other",
-          total: +e.total || 0, paid: +e.paid || 0,
-          dueDate: e.dueDate || "", createdAt: e.createdAt || Date.now()
-        };
-      })
-    };
+  /* ---------- payments modal ---------- */
+  function openPaymentsModal(expId){
+    var x = findExpense(expId);
+    if(!x){ toast("Add this expense first, then record payments."); return; }
+    var total = +x.total || 0, pd = paidOf(x), d = Math.max(total - pd, 0);
+    openModal("Payments · " + x.vendor,
+      "Total " + money(total) + "   ·   Paid " + money(pd) + "   ·   Due " + money(d));
+    useBody();
+
+    var pays = (x.payments || []).slice().sort(function(a, b){ return (a.date || "").localeCompare(b.date || ""); });
+    var listHtml = pays.length ? pays.map(function(p){
+      return '<div class="pay-row" data-pay="' + p.id + '">' +
+        '<input class="dt" type="date" data-pf="date" value="' + esc(p.date || "") + '" aria-label="Payment date">' +
+        '<select data-pf="method" aria-label="Method">' +
+          METHODS.map(function(m){ return '<option' + (m === p.method ? " selected" : "") + ">" + esc(m) + "</option>"; }).join("") +
+        '</select>' +
+        '<input class="num" type="number" min="0" step="1" data-pf="amount" value="' + (+p.amount || 0) + '" aria-label="Amount">' +
+        '<button class="icon-btn del" data-act="delpay" data-id="' + x.id + '" data-pay="' + p.id + '" title="Delete payment" aria-label="Delete payment">✕</button>' +
+      '</div>';
+    }).join("") : '<p class="empty" style="padding:14px 0">No payments yet.</p>';
+
+    modalBody.innerHTML =
+      '<div class="pay-list" data-exp="' + x.id + '">' + listHtml + '</div>' +
+      '<div>' +
+        '<p class="modal-sub" style="margin-bottom:8px">Add a payment</p>' +
+        '<div class="pay-add">' +
+          '<input id="pa-amt" type="number" min="0" step="1" placeholder="Amount" value="' + (d > 0 ? d : "") + '" aria-label="New payment amount">' +
+          '<input id="pa-date" type="date" value="' + todayStr() + '" aria-label="New payment date">' +
+          '<select id="pa-method" aria-label="New payment method">' +
+            METHODS.map(function(m){ return "<option>" + esc(m) + "</option>"; }).join("") +
+          '</select>' +
+          '<input id="pa-note" placeholder="Note (optional)" aria-label="Note">' +
+        '</div>' +
+      '</div>';
+
+    modalActions.appendChild(mkbtn("Add payment", function(){
+      var amt = Math.max(0, +document.getElementById("pa-amt").value || 0);
+      if(!amt){ toast("Enter an amount."); return; }
+      addPayment(x.id, {
+        amount: amt,
+        date: document.getElementById("pa-date").value || "",
+        method: document.getElementById("pa-method").value || "Other",
+        note: (document.getElementById("pa-note").value || "").slice(0, 120)
+      });
+      openPaymentsModal(x.id);
+    }));
+    if(d > 0){
+      var b = mkbtn("Pay remaining (" + money(d) + ")", function(){
+        addPayment(x.id, { amount: d, date: todayStr(), method: document.getElementById("pa-method").value || "Other", note: "" });
+        openPaymentsModal(x.id);
+      });
+      b.classList.remove("btn"); b.className = "linkbtn"; b.style.marginLeft = "4px";
+      modalActions.appendChild(b);
+    }
   }
 
+  /* ---------- manage events modal ---------- */
+  function openEventsModal(){
+    openModal("Event dashboards", "Switch between events, rename them, or remove one.");
+    useBody();
+    function draw(){
+      modalBody.innerHTML =
+        '<div class="evt-list">' + state.data.events.map(function(e){
+          var isCur = e.id === state.data.currentId;
+          return '<div class="evt-item" data-id="' + esc(e.id) + '">' +
+            '<input class="evt-name" data-ef="name" value="' + esc(e.name) + '" aria-label="Event name">' +
+            (isCur ? '<span class="evt-cur">current</span>'
+                   : '<button type="button" class="linkbtn" data-act="evtswitch" data-id="' + esc(e.id) + '">Switch</button>') +
+            (state.data.events.length > 1
+              ? '<button type="button" class="icon-btn del" data-act="evtdel" data-id="' + esc(e.id) + '" title="Delete this dashboard" aria-label="Delete dashboard">✕</button>'
+              : '') +
+          '</div>';
+        }).join("") + '</div>' +
+        '<div>' +
+          '<p class="modal-sub" style="margin-bottom:8px">New dashboard</p>' +
+          '<div class="pay-add" style="grid-template-columns:1fr"><input id="ev-new" placeholder="e.g. Reception, Mehndi, Engagement" aria-label="New event name"></div>' +
+        '</div>';
+      modalActions.innerHTML = "";
+      modalActions.appendChild(mkbtn("Add dashboard", function(){
+        var n = (document.getElementById("ev-new").value || "").trim();
+        if(!n){ toast("Enter a name."); return; }
+        addEvent(n);
+        closeModal();
+        toast("Now showing “" + n + "”.");
+      }));
+      modalBody.__redraw = draw;
+    }
+    draw();
+  }
+
+  /* ---------- backup ---------- */
+  function backupData(){
+    return {
+      app: "wedding-ledger", version: 2, exportedAt: new Date().toISOString(),
+      events: state.data.events.map(normEvent),
+      currentId: state.data.currentId
+    };
+  }
   function doExport(){
     var json = JSON.stringify(backupData(), null, 2);
-    var sub = "Copy this text somewhere safe, or download it as a file. Use “Import backup” on another device to restore it.";
-    if(!state.expenses.length) sub += " Note: you have no saved expenses yet, so this backup is empty.";
+    var n = state.data.events.reduce(function(a, e){ return a + e.expenses.length; }, 0);
+    var sub = "Copy this text somewhere safe, or download it. Use “Import backup” on another device to restore everything (all event dashboards).";
+    if(!n) sub += " Note: no expenses saved yet, so this backup is empty.";
     openModal("Export backup", sub);
+    useText();
     modalText.readOnly = true;
     modalText.value = json;
     modalActions.appendChild(mkbtn("Copy", function(){
@@ -824,7 +1158,7 @@
       }
     }));
     modalActions.appendChild(mkbtn("Download .json", function(){
-      var fname = "wedding-ledger-backup-" + new Date().toISOString().slice(0,10) + ".json";
+      var fname = "wedding-ledger-backup-" + todayStr() + ".json";
       if(window.claude && typeof window.claude.use === "function"){
         window.claude.use("downloads").then(function(dl){
           if(dl && dl.save){
@@ -832,19 +1166,15 @@
               function(){ toast("Backup saved."); },
               function(err){ toast(err && err.code === "declined" ? "Download cancelled." : "Couldn't save — copy the text instead."); }
             );
-          }else{
-            blobDownload(fname, json);
-          }
+          }else{ blobDownload(fname, json); }
         }, function(){ blobDownload(fname, json); });
-      }else{
-        blobDownload(fname, json);
-      }
+      }else{ blobDownload(fname, json); }
     }));
   }
-
   function doImport(){
     openModal("Import backup",
-      "Paste a backup below, or choose a .json file. This replaces the expenses and settings on this device — your passcode is kept.");
+      "Paste a backup below, or choose a .json file. This replaces every event dashboard on this device — your passcode is kept.");
+    useText();
     modalText.readOnly = false;
     modalText.value = "";
     modalText.placeholder = '{ "app": "wedding-ledger", ... }';
@@ -863,7 +1193,7 @@
       var data;
       try{ data = JSON.parse(modalText.value); }
       catch(e){ toast("That doesn't look like valid backup text."); return; }
-      if(!data || data.app !== "wedding-ledger" || !Array.isArray(data.expenses)){
+      if(!data || data.app !== "wedding-ledger" || !(Array.isArray(data.events) || Array.isArray(data.expenses))){
         toast("Unrecognised backup format."); return;
       }
       if(restore.getAttribute("data-armed") !== "1"){
@@ -877,7 +1207,9 @@
         }, 4000);
         return;
       }
-      applyImport(data);
+      state.data = migrateBlob(data);
+      ensureEvent();
+      commit();
       closeModal();
       toast("Backup restored.");
     });
@@ -885,53 +1217,114 @@
     modalActions.appendChild(restore);
   }
 
-  function applyImport(data){
-    var s = data.settings || {};
-    if(s.currency) state.settings.currency = s.currency;
-    state.settings.budgetTarget = Math.max(0, +s.budgetTarget || 0);
-    state.settings.weddingDate = s.weddingDate || "";
-    var list = data.expenses.map(function(e){
-      return {
-        vendor: String(e.vendor || "").slice(0, 120),
-        category: e.category || "Other",
-        total: Math.max(0, +e.total || 0),
-        paid: Math.max(0, +e.paid || 0),
-        dueDate: e.dueDate || "",
-        createdAt: +e.createdAt || Date.now()
-      };
-    });
-    if(mode === "db" && db){
-      db.doc("app/settings").set(state.settings).catch(function(){});
-      db.collection("expenses").get().then(function(snap){
-        snap.docs.forEach(function(dc){ db.doc("expenses/" + dc.id).delete().catch(function(){}); });
-        list.forEach(function(o){ db.collection("expenses").add(o).catch(function(){}); });
-      }, function(){});
-    }else{
-      list.forEach(function(o, i){
-        o.id = "e" + Date.now().toString(36) + i + Math.random().toString(36).slice(2, 5);
-      });
-      state.expenses = list;
-      persistLocal();
-      render();
-    }
-  }
+  /* ---------- wire static controls ---------- */
+  CATEGORIES.forEach(function(c){
+    var o = document.createElement("option");
+    o.value = c; o.textContent = c;
+    document.getElementById("f-cat").appendChild(o);
+  });
+  METHODS.forEach(function(m){
+    var o = document.createElement("option");
+    o.textContent = m;
+    document.getElementById("f-method").appendChild(o);
+  });
 
+  addForm.addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var fd = new FormData(addForm);
+    var vendor = (fd.get("vendor") || "").trim();
+    if(!vendor) return;
+    var paidNow = Math.max(0, +fd.get("paid") || 0);
+    var o = {
+      vendor: vendor,
+      category: fd.get("category") || "Other",
+      total: Math.max(0, +fd.get("total") || 0),
+      dueDate: fd.get("dueDate") || "",
+      payments: []
+    };
+    if(paidNow > 0){
+      o.payments.push(normPayment({ amount: paidNow, date: todayStr(), method: fd.get("method") || "Other" }));
+    }
+    addExpenseObj(o);
+    addForm.reset();
+    document.getElementById("f-vendor").focus();
+  });
+
+  ledgerEl.addEventListener("change", function(ev){
+    var t = ev.target;
+    var id = t.getAttribute("data-id"), f = t.getAttribute("data-field");
+    if(!id || !f) return;
+    var val = t.value;
+    if(f === "total") val = Math.max(0, +val || 0);
+    if(f === "vendor"){ val = val.trim(); if(!val){ render(); return; } }
+    var patch = {}; patch[f] = val;
+    patchExpense(id, patch);
+  });
+
+  summaryEl.addEventListener("change", function(ev){
+    var t = ev.target;
+    if(t.id === "budget") patchEvent({ budgetTarget: Math.max(0, +t.value || 0) });
+    if(t.id === "weddingDate") patchEvent({ weddingDate: t.value });
+  });
+
+  currencySel.addEventListener("change", function(){ patchEvent({ currency: currencySel.value }); });
+  eventSel.addEventListener("change", function(){ switchEvent(eventSel.value); });
+  document.getElementById("evtManage").addEventListener("click", openEventsModal);
   document.getElementById("exportBtn").addEventListener("click", doExport);
   document.getElementById("importBtn").addEventListener("click", doImport);
 
-  /* ---------- cloud sync (Firebase — standalone build, optional) ---------- */
-  var cloud = null, applyingRemote = false, fbUser = null;
+  document.addEventListener("click", function(ev){
+    var b = ev.target.closest("[data-act]");
+    if(!b) return;
+    var act = b.getAttribute("data-act");
+    if(act === "del"){
+      if(b.getAttribute("data-armed") === "1"){
+        removeExpense(b.getAttribute("data-id"));
+      }else{
+        b.setAttribute("data-armed", "1");
+        b.classList.add("armed");
+        b.textContent = "Delete?";
+        b.setAttribute("title", "Click again to remove");
+        clearTimeout(b._revert);
+        b._revert = setTimeout(function(){
+          b.removeAttribute("data-armed");
+          b.classList.remove("armed");
+          b.textContent = "✕";
+          b.setAttribute("title", "Delete");
+        }, 3500);
+      }
+    }else if(act === "pay"){
+      openPaymentsModal(b.getAttribute("data-id"));
+    }else if(act === "delpay"){
+      removePayment(b.getAttribute("data-id"), b.getAttribute("data-pay"));
+      if(!modal.classList.contains("is-hidden")) openPaymentsModal(b.getAttribute("data-id"));
+    }else if(act === "fcat"){
+      state.filter.category = b.getAttribute("data-v"); renderControls(); renderMain();
+    }else if(act === "fstatus"){
+      state.filter.status = b.getAttribute("data-v"); renderControls(); renderMain();
+    }else if(act === "fview"){
+      state.view = b.getAttribute("data-v"); render();
+    }else if(act === "evtswitch"){
+      switchEvent(b.getAttribute("data-id")); closeModal();
+    }else if(act === "evtdel"){
+      if(b.getAttribute("data-armed") === "1"){
+        deleteEvent(b.getAttribute("data-id"));
+        if(modalBody.__redraw) modalBody.__redraw();
+      }else{
+        b.setAttribute("data-armed", "1");
+        b.classList.add("armed");
+        b.textContent = "Delete?";
+        setTimeout(function(){
+          b.removeAttribute("data-armed"); b.classList.remove("armed"); b.textContent = "✕";
+        }, 3500);
+      }
+    }
+  });
 
+  /* ---------- cloud sync (Firebase — standalone build, optional) ---------- */
   function firebaseConfigured(){
     var c = window.FIREBASE_CONFIG;
     return !!(c && c.apiKey && c.projectId && c.appId && c.authDomain);
-  }
-  function cloudSettings(){
-    return {
-      currency: state.settings.currency || "$",
-      budgetTarget: +state.settings.budgetTarget || 0,
-      weddingDate: state.settings.weddingDate || ""
-    };
   }
   function loadFirebase(cb){
     if(window.firebase && window.firebase.firestore){ cb(); return; }
@@ -946,25 +1339,12 @@
       document.head.appendChild(s);
     })(0);
   }
-  function applyRemote(data){
-    if(!data) return;
+  function applyRemote(d){
+    if(!d) return;
+    if(!(Array.isArray(d.events) || Array.isArray(d.expenses))) return;
     applyingRemote = true;
-    if(Array.isArray(data.expenses)){
-      state.expenses = data.expenses.map(function(e){
-        return {
-          id: e.id || ("e" + Math.random().toString(36).slice(2, 9)),
-          vendor: e.vendor || "", category: e.category || "Other",
-          total: +e.total || 0, paid: +e.paid || 0,
-          dueDate: e.dueDate || "", createdAt: +e.createdAt || 0
-        };
-      });
-    }
-    if(data.settings){
-      var s = data.settings;
-      if(s.currency) state.settings.currency = s.currency;
-      state.settings.budgetTarget = +s.budgetTarget || 0;
-      state.settings.weddingDate = s.weddingDate || "";
-    }
+    state.data = migrateBlob(d);
+    ensureEvent();
     saveLocal();
     render();
     applyingRemote = false;
@@ -974,22 +1354,24 @@
     clearTimeout(cloud.t);
     cloud.t = setTimeout(function(){
       cloud.ref.set({
-        expenses: state.expenses,
-        settings: cloudSettings(),
+        events: state.data.events,
+        currentId: state.data.currentId,
         updatedAt: Date.now()
       }, { merge: true }).catch(function(){ toast("Sync failed — your change is saved on this device."); });
     }, 700);
   }
-  function startCloud(uid, preSnap){
-    cloud = { ref: window.firebase.firestore().doc("wallets/" + uid), t: null };
+  function startCloud(uid2, preSnap){
+    cloud = { ref: window.firebase.firestore().doc("wallets/" + uid2), t: null };
     function handle(snap){
       var d = snap && snap.exists ? snap.data() : null;
-      if(!d || !Array.isArray(d.expenses) || (!d.expenses.length && state.expenses.length)){
-        cloud.ref.set({ expenses: state.expenses, settings: cloudSettings(), updatedAt: Date.now() }, { merge: true })
+      var hasRemote = d && (Array.isArray(d.events) && d.events.length || Array.isArray(d.expenses) && d.expenses.length);
+      var hasLocal = state.data.events.some(function(e){ return e.expenses.length; });
+      if(hasRemote){
+        applyRemote(d);
+      }else if(hasLocal || state.data.events.length > 1){
+        cloud.ref.set({ events: state.data.events, currentId: state.data.currentId, updatedAt: Date.now() }, { merge: true })
           .then(function(){ toast("This device's budget is now synced to your account."); })
           .catch(function(){});
-      }else{
-        applyRemote(d);
       }
       cloud.ref.onSnapshot(function(s){ if(s.exists) applyRemote(s.data()); }, function(){});
     }
@@ -1004,7 +1386,6 @@
       chip.classList.remove("is-hidden");
       chip.querySelector(".acct-email").textContent = user.email || "Signed in";
     }
-    if(saveNote) saveNote.textContent = "Synced to your Google account.";
   }
   (function wireSignOut(){
     var so = document.getElementById("signOutBtn");
@@ -1014,8 +1395,6 @@
       catch(e){ location.reload(); }
     });
   })();
-
-  var fbAuth = null;
 
   function firebaseGate(){
     var lockEl = document.getElementById("lock");
@@ -1208,12 +1587,12 @@
     });
   }
 
-  /* ---------- passcode gate ---------- */
+  /* ---------- passcode gate (Claude artifact / local-only) ---------- */
   var LS_HASH = "wedledger.passHash", LS_TRUST = "wedledger.trust";
   var knownHash = null, appStarted = false, creating = false;
 
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
-  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
   function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
 
   function sha256(str){
@@ -1230,14 +1609,13 @@
   }
 
   function persistPassHash(hash){
-    state.settings.passHash = hash;
     if(hash) lsSet(LS_HASH, hash); else lsDel(LS_HASH);
-    try{ localStorage.setItem("wedledger.settings", JSON.stringify(state.settings)); }catch(e){}
+    try{ localStorage.setItem("wedledger.passHash", hash || ""); }catch(e){}
     if(mode === "db" && db){
-      db.doc("app/settings").set(state.settings).catch(function(){});
+      db.doc("app/settings").set({ passHash: hash || "" }).catch(function(){});
     }else if(window.claude && window.claude.use){
       window.claude.use("db").then(function(d){
-        if(d) d.doc("app/settings").set(state.settings).catch(function(){});
+        if(d) d.doc("app/settings").set({ passHash: hash || "" }).catch(function(){});
       }).catch(function(){});
     }
   }
@@ -1331,7 +1709,7 @@
       lockBtn.addEventListener("click", function(){ lsDel(LS_TRUST); enterMode(); open(); });
     }
 
-    var localHash = lsGet(LS_HASH) || (state.settings.passHash || "");
+    var localHash = lsGet(LS_HASH) || "";
     if(localHash){
       knownHash = localHash;
       if(lsGet(LS_TRUST) === localHash) unlock();
@@ -1374,21 +1752,32 @@
       window.claude.use("db").then(function(d){
         if(!d) return;
         db = d; mode = "db";
-        state.expenses = [];
-        db.collection("expenses").onSnapshot(function(snap){
-          state.expenses = snap.docs.map(function(dc){
-            var o = Object.assign({}, dc.data() || {}); o.id = dc.id; return o;
-          });
-          state.expenses.sort(function(a,b){ return (a.createdAt||0) - (b.createdAt||0); });
-          render();
-        }, function(){ mode = "local"; loadLocal(); render(); });
-        db.doc("app/settings").onSnapshot(function(snap){
-          if(snap.exists){
-            var s = snap.data() || {};
-            for(var k in s) state.settings[k] = s[k];
-            if(s.passHash && s.passHash !== knownHash){ knownHash = s.passHash; lsSet(LS_HASH, s.passHash); }
+        d.doc("app/v2").get().then(function(snap){
+          if(snap.exists && snap.data() && Array.isArray(snap.data().events)){
+            applyRemote(snap.data());
+          }else{
+            Promise.all([
+              d.collection("expenses").get().catch(function(){ return { docs: [] }; }),
+              d.doc("app/settings").get().catch(function(){ return { exists: false }; })
+            ]).then(function(r){
+              var exps = (r[0].docs || []).map(function(dc){
+                var o = Object.assign({}, dc.data() || {}); o.id = dc.id; return o;
+              });
+              var settings = r[1] && r[1].exists ? (r[1].data() || {}) : {};
+              if(exps.length){
+                state.data = migrateBlob({ expenses: exps, settings: settings });
+                ensureEvent(); saveLocal(); render();
+              }
+              d.doc("app/v2").set({ events: state.data.events, currentId: state.data.currentId }).catch(function(){});
+            }, function(){});
           }
-          render();
+          d.doc("app/v2").onSnapshot(function(s){ if(s.exists) applyRemote(s.data()); }, function(){});
+        }, function(){});
+        d.doc("app/settings").onSnapshot(function(snap){
+          if(snap.exists){
+            var ph = (snap.data() || {}).passHash || "";
+            if(ph && ph !== knownHash){ knownHash = ph; lsSet(LS_HASH, ph); }
+          }
         }, function(){});
       }).catch(function(){});
     }
